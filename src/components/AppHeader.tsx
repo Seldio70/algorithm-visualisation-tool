@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import type { ThemeAccent } from "../types";
 import { ACCENT } from "../constants/theme";
-import { STATE_STYLES, LEGEND } from "../constants/theme";
 
 interface AppHeaderProps {
   onToggleSidebar: () => void;
@@ -67,19 +66,6 @@ export function AppHeader({
         )}
       </div>
     </header>
-  );
-}
-
-export function Legend() {
-  return (
-    <div className="flex flex-wrap gap-2 mt-3">
-      {LEGEND.map(({ state, label }) => (
-        <div key={state} className="flex items-center gap-1.5 text-xs text-slate-400">
-          <div className={`w-3 h-3 rounded border ${STATE_STYLES[state]}`} />
-          {label}
-        </div>
-      ))}
-    </div>
   );
 }
 

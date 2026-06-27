@@ -1,15 +1,21 @@
-import type { AlgorithmDefinition, Step, ElementState } from "../types";
+import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../types";
 import { finalStep } from "./helpers";
 
+/** Heap-array representation of a BST (index 0 = root). */
 const TREE = [8, 3, 10, 1, 6, 0, 14, 0, 0, 4, 7, 0, 0, 0, 13];
 
-function makeTreeElements(order: number[], states: Record<number, ElementState>) {
-  return order.map((idx) => ({
-    id: `el-${idx}`,
-    value: TREE[idx] || "∅",
-    label: ["", "L", "R", "L", "R", "L", "R", "L", "R", "L", "R", "L", "R", "L", "R"][idx] ?? "",
-    state: states[idx] ?? "default",
-  }));
+function heapToElements(states: Record<number, ElementState>): VisualElement[] {
+  const elements: VisualElement[] = [];
+  for (let i = 0; i < TREE.length; i++) {
+    if (TREE[i] === 0) continue;
+    elements.push({
+      id: `el-${i}`,
+      value: TREE[i],
+      parentId: i === 0 ? null : `el-${Math.floor((i - 1) / 2)}`,
+      state: states[i] ?? "default",
+    });
+  }
+  return elements;
 }
 
 function generateSteps(_input: number[]): Step[] {
@@ -19,7 +25,7 @@ function generateSteps(_input: number[]): Step[] {
 
   steps.push({
     id: stepId++,
-    elements: makeTreeElements([0], {}),
+    elements: heapToElements({}),
     highlightedLines: [1],
     explanation: `Binary tree traversals visit every node in a specific order. This BST has root 8. We'll demonstrate inorder: Left → Root → Right.`,
     variables: { order: "inorder" },
@@ -32,12 +38,17 @@ function generateSteps(_input: number[]): Step[] {
     walkInorder(idx * 2 + 1, [...stack, `inorder(${TREE[idx * 2 + 1] ?? "null"})`]);
 
     visitedOrder.push(TREE[idx]);
+    const nodeStates: Record<number, ElementState> = {};
+    for (let i = 0; i < TREE.length; i++) {
+      if (TREE[i] === 0) continue;
+      const visitedIdx = visitedOrder.indexOf(TREE[i]);
+      if (visitedIdx >= 0 && visitedIdx < visitedOrder.length - 1) nodeStates[i] = "visited";
+    }
+    nodeStates[idx] = "current";
+
     steps.push({
       id: stepId++,
-      elements: makeTreeElements(
-        visitedOrder.map((v) => TREE.indexOf(v)),
-        { [idx]: "current" }
-      ),
+      elements: heapToElements(nodeStates),
       highlightedLines: [2, 3],
       explanation: `Visit node ${TREE[idx]}. Inorder visits left subtree first, then root, then right.`,
       variables: { visited: visitedOrder.join(", ") },
@@ -50,13 +61,15 @@ function generateSteps(_input: number[]): Step[] {
 
   walkInorder(0, ["inorder(8)"]);
 
+  const finalStates: Record<number, ElementState> = {};
+  for (let i = 0; i < TREE.length; i++) {
+    if (TREE[i] !== 0) finalStates[i] = "sorted";
+  }
+
   steps.push(
     finalStep(
       stepId,
-      makeTreeElements(
-        [1, 3, 4, 0, 2, 5, 6],
-        Object.fromEntries([0, 1, 3, 4, 2, 5, 6].map((i) => [i, "sorted" as ElementState]))
-      ),
+      heapToElements(finalStates),
       `✅ Inorder traversal: [${visitedOrder.join(", ")}]. For a BST, inorder gives sorted order!`,
       "Tree traversals (inorder, preorder, postorder) are fundamental for parsing, file systems, and expression trees. Inorder on a BST always yields sorted values.",
       4

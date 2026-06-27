@@ -16,11 +16,24 @@ export interface VisualElement {
   value: number | string;
   state: ElementState;
   label?: string;
+  parentId?: string | null;
 }
 
 export interface Pointer {
   name: string;
   targetId: string;
+}
+
+export interface GraphEdge {
+  from: string;
+  to: string;
+  weight?: number;
+  state?: ElementState;
+}
+
+export interface GraphLayout {
+  nodes: { id: string; x: number; y: number }[];
+  edges: { from: string; to: string }[];
 }
 
 export interface Step {
@@ -31,6 +44,7 @@ export interface Step {
   explanation: string;
   variables?: Record<string, number | string | boolean>;
   callStack?: string[];
+  edges?: GraphEdge[];
 }
 
 export type VisualizerLayout =
@@ -67,6 +81,7 @@ export interface AlgorithmMeta {
   gridCols?: number;
   fortyTwoNote?: string;
   accent?: ThemeAccent;
+  graphLayout?: GraphLayout;
 }
 
 export interface AlgorithmDefinition {

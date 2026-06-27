@@ -8,3 +8,36 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.themed-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) #020617;
+}
+
+.themed-scrollbar::-webkit-scrollbar {
+  width: 9px;
+}
+
+.themed-scrollbar::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 2px solid #020617;
+  border-radius: 999px;
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+.themed-scrollbar-cyan {
+  --scrollbar-thumb: rgb(6 182 212 / 45%);
+  --scrollbar-thumb-hover: rgb(34 211 238 / 72%);
+}
+
+.themed-scrollbar-violet {
+  --scrollbar-thumb: rgb(139 92 246 / 48%);
+  --scrollbar-thumb-hover: rgb(167 139 250 / 75%);
+}
