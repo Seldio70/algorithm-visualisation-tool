@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { algorithms, algorithmMap } from "../algorithms";
+import { mainAlgorithms, algorithmMap } from "../algorithms";
 import { useAlgorithm } from "../hooks/useAlgorithm";
-import { AppHeader, Legend, CallStackPanel } from "../components/AppHeader";
+import { AppHeader, CallStackPanel } from "../components/AppHeader";
+import { Legend } from "../components/Legend";
 import { AlgorithmSidebar } from "../components/AlgorithmSidebar";
 import { Visualizer } from "../components/Visualizer";
 import { CodePanel } from "../components/CodePanel";
@@ -10,34 +11,37 @@ import { VariablesPanel } from "../components/VariablesPanel";
 import { Controls } from "../components/Controls";
 import { StepExplanation } from "../components/StepExplanation";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
-import type { ThemeAccent } from "../types";
+import type { ThemeAccent, AlgorithmDefinition } from "../types";
 
 export function LearnPage() {
   const { algorithmId } = useParams<{ algorithmId: string }>();
-  const defaultId = algorithms[0].meta.id;
+  const defaultId = mainAlgorithms[0].meta.id;
 
   if (!algorithmId) {
     return <Navigate to={`/learn/${defaultId}`} replace />;
   }
 
   const algo = algorithmMap[algorithmId];
-  if (!algo) {
+  if (!algo || algo.meta.category === "42 Tirana") {
     return <Navigate to={`/learn/${defaultId}`} replace />;
   }
 
-  return <AlgorithmWorkspace algo={algo} selectedId={algorithmId} basePath="/learn" />;
+  return <AlgorithmWorkspace key={algo.meta.id} algo={algo} selectedId={algorithmId} basePath="/learn" sidebarAlgorithms={mainAlgorithms} />;
 }
 
 interface AlgorithmWorkspaceProps {
-  algo: (typeof algorithms)[0];
+  algo: AlgorithmDefinition;
   selectedId: string;
   basePath: string;
   forceAccent?: ThemeAccent;
+  sidebarAlgorithms: AlgorithmDefinition[];
 }
 
-export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent }: AlgorithmWorkspaceProps) {
+export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, sidebarAlgorithms }: AlgorithmWorkspaceProps) {
   const [view, setView] = useState<"visualizer" | "about">("visualizer");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 640px)").matches : true
+  );
   const accent: ThemeAccent = forceAccent ?? algo.meta.accent ?? "cyan";
   const a = ACCENT[accent];
 
@@ -55,12 +59,16 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent }: 
   } = useAlgorithm(algo);
 
   const { meta } = algo;
-  const filterAlgos = basePath === "/42"
-    ? algorithms.filter((x) => x.meta.category === "42 Tirana")
-    : algorithms;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const handler = (e: MediaQueryListEvent) => setSidebarOpen(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="h-dvh bg-slate-950 text-white flex flex-col overflow-hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <AppHeader
         onToggleSidebar={() => setSidebarOpen((o) => !o)}
         currentStep={currentStep}
@@ -68,29 +76,29 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent }: 
         accent={accent}
       />
 
-      <div className="flex flex-1 overflow-hidden flex-col sm:flex-row">
+      <div className="flex flex-1 min-h-0 overflow-hidden flex-col sm:flex-row">
         {sidebarOpen && (
           <AlgorithmSidebar
-            algorithms={filterAlgos}
+            algorithms={sidebarAlgorithms}
             selectedId={selectedId}
             basePath={basePath}
             accent={accent}
           />
         )}
 
-        <main className="flex-1 flex flex-col overflow-hidden min-w-0">
-          <div className="px-4 sm:px-5 pt-4 pb-3 border-b border-slate-800 flex flex-col sm:flex-row items-start justify-between gap-4">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-lg font-bold">{meta.name}</h1>
+        <main className="flex-1 flex flex-col min-h-0 overflow-hidden min-w-0">
+          <div className="shrink-0 px-4 sm:px-5 py-2 border-b border-slate-800 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-base sm:text-lg font-bold">{meta.name}</h1>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFFICULTY_COLOR[meta.difficulty]}`}>
                   {meta.difficulty}
                 </span>
                 <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">{meta.category}</span>
               </div>
-              <p className="text-sm text-slate-400 max-w-xl">{meta.description}</p>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1 line-clamp-2 max-w-xl">{meta.description}</p>
               {meta.fortyTwoNote && (
-                <p className="text-xs text-violet-400/80 mt-1">42 Project: {meta.fortyTwoNote}</p>
+                <p className="text-xs text-violet-400/80 mt-0.5 line-clamp-1">42 Project: {meta.fortyTwoNote}</p>
               )}
             </div>
             <div className="flex gap-1 shrink-0">
@@ -138,40 +146,43 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent }: 
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-              <div className="flex flex-col overflow-hidden min-w-0 lg:flex-1 lg:max-w-[52%]">
-                <div className="shrink-0 bg-white/5 backdrop-blur border-b border-white/10 p-3 sm:p-4">
-                  <div className="h-32 sm:h-36 flex items-center justify-center overflow-hidden">
+            <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
+              <div className="flex flex-col shrink-0 lg:shrink lg:flex-1 min-w-0 lg:max-w-[52%] overflow-hidden">
+                <div className="shrink-0 lg:flex-1 lg:min-h-0 flex flex-col bg-white/5 backdrop-blur border-b border-white/10 p-3 sm:p-4">
+                  <div className="h-36 sm:h-40 lg:h-auto lg:flex-1 lg:min-h-[12rem] flex items-center justify-center overflow-hidden">
                     {step && (
                       <Visualizer
                         step={step}
                         layout={meta.layout}
                         gridCols={meta.gridCols}
+                        graphLayout={meta.graphLayout}
                         accent={accent}
-                        compact
                       />
                     )}
                   </div>
-                  <Legend />
+                  <Legend layout={meta.layout} />
                 </div>
 
                 {step && <StepExplanation explanation={step.explanation} accent={accent} />}
 
-                <Controls
-                  isPlaying={isPlaying}
-                  currentStep={currentStep}
-                  totalSteps={steps.length}
-                  speed={speed}
-                  onReset={reset}
-                  onPrev={prev}
-                  onTogglePlay={togglePlay}
-                  onNext={next}
-                  onSpeedChange={setSpeed}
-                  accent={accent}
-                />
+                <div className="shrink-0 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
+                  <Controls
+                    isPlaying={isPlaying}
+                    currentStep={currentStep}
+                    totalSteps={steps.length}
+                    speed={speed}
+                    onReset={reset}
+                    onPrev={prev}
+                    onTogglePlay={togglePlay}
+                    onNext={next}
+                    onSpeedChange={setSpeed}
+                    accent={accent}
+                    compact
+                  />
+                </div>
               </div>
 
-              <div className="flex-1 lg:flex-none lg:w-[48%] lg:min-w-[22rem] border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col bg-slate-900/50 overflow-hidden min-h-[14rem] lg:min-h-0">
+              <div className="flex flex-col min-h-0 min-w-0 flex-1 lg:flex-none lg:w-[48%] lg:min-w-[22rem] border-t lg:border-t-0 lg:border-l border-slate-800 bg-slate-900/50 overflow-hidden max-h-[40vh] lg:max-h-none">
                 <div className="px-4 py-2.5 border-b border-slate-800 shrink-0">
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Code</p>
                 </div>

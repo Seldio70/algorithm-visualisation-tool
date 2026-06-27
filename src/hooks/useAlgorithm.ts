@@ -1,20 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { AlgorithmDefinition, Step } from "../types";
 
 export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
-  const [steps, setSteps] = useState<Step[]>([]);
+  const steps = useMemo<Step[]>(
+    () => (algo ? algo.generateSteps(algo.meta.defaultInput) : []),
+    [algo]
+  );
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(700);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (!algo) return;
-    const s = algo.generateSteps(algo.meta.defaultInput);
-    setSteps(s);
-    setCurrentStep(0);
-    setIsPlaying(false);
-  }, [algo]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -40,7 +35,12 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.code === "Space") {
         e.preventDefault();
-        setIsPlaying((p) => !p);
+        if (isPlaying) {
+          setIsPlaying(false);
+        } else {
+          if (currentStep >= steps.length - 1) setCurrentStep(0);
+          setIsPlaying(true);
+        }
       }
       if (e.code === "ArrowRight") {
         setIsPlaying(false);
@@ -57,7 +57,7 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [steps.length]);
+  }, [currentStep, isPlaying, steps.length]);
 
   const reset = useCallback(() => {
     setCurrentStep(0);
@@ -74,7 +74,16 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
     setIsPlaying(false);
   }, [steps.length]);
 
-  const togglePlay = useCallback(() => setIsPlaying((p) => !p), []);
+  const togglePlay = useCallback(() => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      return;
+    }
+    if (currentStep >= steps.length - 1) {
+      setCurrentStep(0);
+    }
+    setIsPlaying(true);
+  }, [currentStep, isPlaying, steps.length]);
 
   const step = steps[currentStep];
   const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;

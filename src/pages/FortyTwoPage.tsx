@@ -12,10 +12,12 @@ export function FortyTwoPage() {
     }
     return (
       <AlgorithmWorkspace
+        key={algo.meta.id}
         algo={algo}
         selectedId={algorithmId}
         basePath="/42"
         forceAccent="violet"
+        sidebarAlgorithms={fortyTwoAlgorithms}
       />
     );
   }

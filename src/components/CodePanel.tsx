@@ -10,7 +10,7 @@ interface CodePanelProps {
 export function CodePanel({ code, highlightedLines, accent = "cyan" }: CodePanelProps) {
   const a = ACCENT[accent];
   return (
-    <div className="font-mono text-[13px] leading-relaxed overflow-auto h-full">
+    <div className={`themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} font-mono text-[13px] leading-relaxed overflow-auto h-full`}>
       {code.split("\n").map((line, i) => {
         const lineNum = i + 1;
         const isHighlighted = highlightedLines.includes(lineNum);

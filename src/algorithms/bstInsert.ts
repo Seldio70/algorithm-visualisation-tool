@@ -1,29 +1,51 @@
-import type { AlgorithmDefinition, Step, ElementState } from "../types";
+import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../types";
 import { finalStep } from "./helpers";
+
+interface BstNode {
+  id: string;
+  value: number;
+  parentId: string | null;
+}
+
+function leftChild(nodes: BstNode[], parent: BstNode): BstNode | undefined {
+  return nodes.find((n) => n.parentId === parent.id && n.value < parent.value);
+}
+
+function rightChild(nodes: BstNode[], parent: BstNode): BstNode | undefined {
+  return nodes.find((n) => n.parentId === parent.id && n.value > parent.value);
+}
+
+function toElements(nodes: BstNode[], states: Record<string, ElementState>): VisualElement[] {
+  return nodes.map((n) => ({
+    id: n.id,
+    value: n.value,
+    parentId: n.parentId,
+    state: states[n.id] ?? "default",
+  }));
+}
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const values = [...input];
-  const tree: (number | null)[] = [];
+  const nodes: BstNode[] = [];
+  let idCounter = 0;
 
   steps.push({
     id: stepId++,
-    elements: [{ id: "el-0", value: "∅", state: "default", label: "root" }],
+    elements: [],
     highlightedLines: [1],
     explanation: `BST Insert maintains the property: left child < node < right child. We'll insert values one by one into an empty tree.`,
     variables: { toInsert: values.join(", ") },
   });
 
   for (const val of values) {
-    let idx = 0;
-    const nodes: { idx: number; val: number | null; state: ElementState }[] = [];
-
-    if (tree.length === 0) {
-      tree.push(val);
+    if (nodes.length === 0) {
+      const id = `el-${idCounter++}`;
+      nodes.push({ id, value: val, parentId: null });
       steps.push({
         id: stepId++,
-        elements: [{ id: "el-0", value: val, state: "current", label: "root" }],
+        elements: toElements(nodes, { [id]: "current" }),
         highlightedLines: [2],
         explanation: `Tree is empty. ${val} becomes the root.`,
         variables: { inserted: val, position: "root" },
@@ -31,79 +53,65 @@ function generateSteps(input: number[]): Step[] {
       continue;
     }
 
-    while (true) {
-      nodes.push({ idx, val: tree[idx] ?? null, state: "comparing" });
-      const current = tree[idx]!;
+    let cur = nodes[0];
+    const pathStates: Record<string, ElementState> = {};
 
+    while (true) {
+      pathStates[cur.id] = "current";
       steps.push({
         id: stepId++,
-        elements: tree.map((v, i) => ({
-          id: `el-${i}`,
-          value: v ?? "∅",
-          state: i === idx ? "current" : nodes.some((n) => n.idx === i) ? "visited" : "default",
-          label: i === 0 ? "root" : undefined,
-        })),
+        elements: toElements(nodes, { ...pathStates, [cur.id]: "comparing" }),
         highlightedLines: [3, 4],
-        explanation: `Insert ${val}: compare with node ${current}. ${val < current ? `${val} < ${current} → go LEFT.` : `${val} > ${current} → go RIGHT.`}`,
-        variables: { inserting: val, current, compare: val < current ? "<" : ">" },
-        pointers: [{ name: "curr", targetId: `el-${idx}` }],
+        explanation: `Insert ${val}: compare with node ${cur.value}. ${val < cur.value ? `${val} < ${cur.value} → go LEFT.` : `${val} > ${cur.value} → go RIGHT.`}`,
+        variables: { inserting: val, current: cur.value, compare: val < cur.value ? "<" : ">" },
+        pointers: [{ name: "curr", targetId: cur.id }],
       });
 
-      if (val < current) {
-        const left = idx * 2 + 1;
-        if (left >= tree.length || tree[left] == null) {
-          while (tree.length <= left) tree.push(null);
-          tree[left] = val;
+      if (val < cur.value) {
+        const left = leftChild(nodes, cur);
+        if (!left) {
+          const id = `el-${idCounter++}`;
+          nodes.push({ id, value: val, parentId: cur.id });
           steps.push({
             id: stepId++,
-            elements: tree.map((v, i) => ({
-              id: `el-${i}`,
-              value: v ?? "∅",
-              state: i === left ? "inserting" : i === idx ? "visited" : "default",
-            })),
+            elements: toElements(nodes, { [cur.id]: "visited", [id]: "inserting" }),
             highlightedLines: [5],
-            explanation: `Insert ${val} as left child of ${current}.`,
-            variables: { inserted: val, parent: current, side: "left" },
+            explanation: `Insert ${val} as left child of ${cur.value}.`,
+            variables: { inserted: val, parent: cur.value, side: "left" },
           });
           break;
         }
-        idx = left;
+        pathStates[cur.id] = "visited";
+        cur = left;
       } else {
-        const right = idx * 2 + 2;
-        if (right >= tree.length || tree[right] == null) {
-          while (tree.length <= right) tree.push(null);
-          tree[right] = val;
+        const right = rightChild(nodes, cur);
+        if (!right) {
+          const id = `el-${idCounter++}`;
+          nodes.push({ id, value: val, parentId: cur.id });
           steps.push({
             id: stepId++,
-            elements: tree.map((v, i) => ({
-              id: `el-${i}`,
-              value: v ?? "∅",
-              state: i === right ? "inserting" : i === idx ? "visited" : "default",
-            })),
+            elements: toElements(nodes, { [cur.id]: "visited", [id]: "inserting" }),
             highlightedLines: [6],
-            explanation: `Insert ${val} as right child of ${current}.`,
-            variables: { inserted: val, parent: current, side: "right" },
+            explanation: `Insert ${val} as right child of ${cur.value}.`,
+            variables: { inserted: val, parent: cur.value, side: "right" },
           });
           break;
         }
-        idx = right;
+        pathStates[cur.id] = "visited";
+        cur = right;
       }
     }
   }
 
-  steps.push(
-    finalStep(
+  steps.push({
+    ...finalStep(
       stepId,
-      tree.map((v, i) => ({
-        id: `el-${i}`,
-        value: v ?? "∅",
-        state: "sorted" as ElementState,
-      })),
+      toElements(nodes, Object.fromEntries(nodes.map((n) => [n.id, "sorted" as ElementState]))),
       `✅ BST built with ${values.length} insertions. Inorder traversal would yield sorted values.`,
       "BST insert is O(h) where h is height — O(log n) for balanced trees, O(n) worst case. Self-balancing trees (AVL, Red-Black) fix the worst case.",
       7
-    )
-  );
+    ),
+  });
 
   return steps;
 }

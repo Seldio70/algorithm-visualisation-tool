@@ -1,46 +1,92 @@
-import type { AlgorithmDefinition, Step, ElementState } from "../types";
+import type { AlgorithmDefinition, Step, ElementState, GraphEdge, VisualElement } from "../types";
 import { finalStep } from "./helpers";
+import { DIJKSTRA_EDGES, DIJKSTRA_GRAPH_LAYOUT, edgeId } from "./graphConfig";
 
-const NODES = [
-  { id: 0, label: "A", dist: Infinity },
-  { id: 1, label: "B", dist: Infinity },
-  { id: 2, label: "C", dist: Infinity },
-  { id: 3, label: "D", dist: Infinity },
-  { id: 4, label: "E", dist: Infinity },
-];
+const LABELS = ["A", "B", "C", "D", "E"];
+const SOURCE = 0;
+const TARGET = 4; // showcase shortest path A → E
 
-const EDGES: [number, number, number][] = [
-  [0, 1, 4], [0, 2, 2], [1, 2, 1], [1, 3, 5], [2, 3, 8], [2, 4, 10], [3, 4, 2],
-];
+function edgeKey(a: number, b: number): string {
+  const { from, to } = edgeId(a, b);
+  return from < to ? `${from}-${to}` : `${to}-${from}`;
+}
 
-function makeNodes(states: Record<number, ElementState>, dists: number[]) {
-  return NODES.map((n, i) => ({
+function makeNodes(
+  states: Record<number, ElementState>,
+  dists: number[],
+  pathStep?: Record<number, number>
+): VisualElement[] {
+  return LABELS.map((label, i) => ({
     id: `el-${i}`,
     value: dists[i] === Infinity ? "∞" : dists[i],
-    label: n.label,
+    label: pathStep?.[i] !== undefined ? `${pathStep[i]}. ${label}` : label,
     state: states[i] ?? "default",
   }));
+}
+
+function buildEdges(
+  nodeStates: Record<number, ElementState>,
+  activeEdge?: [number, number],
+  pathEdgeKeys?: Set<string>
+): GraphEdge[] {
+  return DIJKSTRA_EDGES.map(([a, b, w]) => {
+    const base = edgeId(a, b);
+    const key = edgeKey(a, b);
+    const edge: GraphEdge = { ...base, weight: w };
+
+    if (pathEdgeKeys?.has(key)) {
+      edge.state = "path";
+    } else if (activeEdge && ((activeEdge[0] === a && activeEdge[1] === b) || (activeEdge[0] === b && activeEdge[1] === a))) {
+      edge.state = "highlight";
+    } else if (nodeStates[a] === "visited" && nodeStates[b] === "visited") {
+      edge.state = "visited";
+    } else {
+      edge.state = "default";
+    }
+    return edge;
+  });
+}
+
+function reconstructPath(parent: (number | null)[], target: number): number[] {
+  const path: number[] = [];
+  let cur: number | null = target;
+  while (cur !== null) {
+    path.unshift(cur);
+    cur = parent[cur];
+  }
+  return path;
+}
+
+function pathEdgesFromNodes(path: number[]): Set<string> {
+  const keys = new Set<string>();
+  for (let i = 0; i < path.length - 1; i++) {
+    keys.add(edgeKey(path[i], path[i + 1]));
+  }
+  return keys;
 }
 
 function generateSteps(_input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
-  const dist = NODES.map(() => Infinity);
+  const dist = LABELS.map(() => Infinity);
+  const parent: (number | null)[] = LABELS.map(() => null);
   const visited = new Set<number>();
-  dist[0] = 0;
+  dist[SOURCE] = 0;
+  parent[SOURCE] = null;
 
   steps.push({
     id: stepId++,
-    elements: makeNodes({ 0: "current" }, dist),
+    elements: makeNodes({ [SOURCE]: "current" }, dist),
+    edges: buildEdges({ [SOURCE]: "current" }),
     highlightedLines: [1, 2],
-    explanation: `Dijkstra's finds shortest paths from source A to all nodes in a weighted graph. Initialize all distances to ∞, source to 0.`,
-    variables: { source: "A", distA: 0 },
+    explanation: `Dijkstra's finds shortest paths from source A to all nodes. Initialize distances to ∞, set A = 0.`,
+    variables: { source: "A", target: LABELS[TARGET] },
   });
 
-  while (visited.size < NODES.length) {
+  while (visited.size < LABELS.length) {
     let u = -1;
     let minDist = Infinity;
-    for (let i = 0; i < NODES.length; i++) {
+    for (let i = 0; i < LABELS.length; i++) {
       if (!visited.has(i) && dist[i] < minDist) {
         minDist = dist[i];
         u = i;
@@ -49,43 +95,73 @@ function generateSteps(_input: number[]): Step[] {
     if (u === -1) break;
     visited.add(u);
 
+    const pickStates: Record<number, ElementState> = {
+      ...Object.fromEntries([...visited].map((v) => [v, "visited" as ElementState])),
+      [u]: "current",
+    };
+
     steps.push({
       id: stepId++,
-      elements: makeNodes(
-        { ...Object.fromEntries([...visited].map((v) => [v, "visited" as ElementState])), [u]: "current" },
-        dist
-      ),
+      elements: makeNodes(pickStates, dist),
+      edges: buildEdges(pickStates),
       highlightedLines: [3, 4],
-      explanation: `Pick unvisited node ${NODES[u].label} with smallest distance (${dist[u]}). Relax its edges.`,
-      variables: { current: NODES[u].label, distance: dist[u] },
+      explanation: `Pick unvisited node ${LABELS[u]} with smallest distance (${dist[u]}). Relax its outgoing edges.`,
+      variables: { current: LABELS[u], distance: dist[u] },
+      pointers: [{ name: LABELS[u], targetId: `el-${u}` }],
     });
 
-    for (const [a, b, w] of EDGES) {
+    for (const [a, b, w] of DIJKSTRA_EDGES) {
       const v = a === u ? b : b === u ? a : -1;
       if (v === -1 || visited.has(v)) continue;
       const alt = dist[u] + w;
       if (alt < dist[v]) {
         dist[v] = alt;
+        parent[v] = u;
         steps.push({
           id: stepId++,
-          elements: makeNodes({ [v]: "highlight", [u]: "current" }, dist),
+          elements: makeNodes({ ...pickStates, [v]: "highlight" }, dist),
+          edges: buildEdges({ ...pickStates, [v]: "highlight" }, [u, v]),
           highlightedLines: [5, 6],
-          explanation: `Relax edge ${NODES[u].label}→${NODES[v].label} (weight ${w}). New distance to ${NODES[v].label}: ${alt}.`,
-          variables: { edge: `${NODES[u].label}→${NODES[v].label}`, weight: w, newDist: alt },
+          explanation: `Relax edge ${LABELS[u]}→${LABELS[v]} (weight ${w}). New best distance to ${LABELS[v]}: ${alt}.`,
+          variables: { edge: `${LABELS[u]}→${LABELS[v]}`, weight: w, newDist: alt },
         });
       }
     }
   }
 
-  steps.push(
-    finalStep(
-      stepId,
-      makeNodes(Object.fromEntries(NODES.map((_, i) => [i, "path" as ElementState])), dist),
-      `✅ Shortest distances from A: ${NODES.map((n, i) => `${n.label}=${dist[i]}`).join(", ")}.`,
-      "Dijkstra's powers GPS navigation and network routing. It requires non-negative weights — use Bellman-Ford for negative edges.",
-      7
-    )
+  const shortestPath = reconstructPath(parent, TARGET);
+  const pathEdgeKeys = pathEdgesFromNodes(shortestPath);
+  const pathStep: Record<number, number> = {};
+  shortestPath.forEach((node, i) => {
+    pathStep[node] = i + 1;
+  });
+
+  const pathLabels = shortestPath.map((n) => LABELS[n]).join(" → ");
+  const pathCost = dist[TARGET];
+
+  const finalNodeStates: Record<number, ElementState> = Object.fromEntries(
+    LABELS.map((_, i) => [i, shortestPath.includes(i) ? ("path" as ElementState) : ("visited" as ElementState)])
   );
+
+  steps.push({
+    id: stepId++,
+    elements: makeNodes(finalNodeStates, dist, pathStep),
+    edges: buildEdges(finalNodeStates, undefined, pathEdgeKeys),
+    highlightedLines: [7],
+    explanation: `Shortest path A → ${LABELS[TARGET]}: ${pathLabels} (total cost ${pathCost}). Only this route is highlighted — other nodes show final distances.`,
+    variables: { path: pathLabels, cost: pathCost },
+  });
+
+  steps.push({
+    ...finalStep(
+      stepId,
+      makeNodes(finalNodeStates, dist, pathStep),
+      `✅ Shortest distances from A: ${LABELS.map((l, i) => `${l}=${dist[i]}`).join(", ")}. Path to ${LABELS[TARGET]}: ${pathLabels} (${pathCost}).`,
+      "Dijkstra's powers GPS navigation and network routing. It requires non-negative weights — use Bellman-Ford for negative edges.",
+      8
+    ),
+    edges: buildEdges(finalNodeStates, undefined, pathEdgeKeys),
+  });
 
   return steps;
 }
@@ -97,11 +173,12 @@ export const dijkstra: AlgorithmDefinition = {
     category: "Graph",
     difficulty: "Advanced",
     layout: "graph",
+    graphLayout: DIJKSTRA_GRAPH_LAYOUT,
     timeComplexity: { best: "O(E log V)", average: "O(E log V)", worst: "O(V²)" },
     spaceComplexity: "O(V)",
     description: "Finds shortest paths from a source node to all other nodes in a weighted graph with non-negative edges.",
     defaultInput: [0],
-    code: `function dijkstra(graph, source) {\n  const dist = {};\n  dist[source] = 0;\n  while (unvisited.size) {\n    const u = minDist(unvisited, dist);\n    for (const [v, w] of graph[u]) {\n      if (dist[u] + w < dist[v]) dist[v] = dist[u] + w;\n    }\n  }\n}`,
+    code: `function dijkstra(graph, source) {\n  const dist = {};\n  const parent = {};\n  dist[source] = 0;\n  while (unvisited.size) {\n    const u = minDist(unvisited, dist);\n    for (const [v, w] of graph[u]) {\n      if (dist[u] + w < dist[v]) {\n        dist[v] = dist[u] + w;\n        parent[v] = u;\n      }\n    }\n  }\n}`,
   },
   generateSteps,
 };
