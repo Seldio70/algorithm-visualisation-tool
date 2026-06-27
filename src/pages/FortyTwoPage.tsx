@@ -27,7 +27,7 @@ export function FortyTwoPage() {
           <div className="w-8 h-8 bg-violet-500 rounded-xl flex items-center justify-center">
             <span className="font-bold text-sm">42</span>
           </div>
-          <span className="font-bold">AlgoViz × 42 Tirana</span>
+          <span className="font-bold">AlgoVisualisation × 42 Tirana</span>
         </Link>
         <Link to="/learn" className="text-sm text-cyan-400 hover:underline">
           Main App →
