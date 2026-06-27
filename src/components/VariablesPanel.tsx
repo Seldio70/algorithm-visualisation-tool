@@ -11,7 +11,7 @@ export function VariablesPanel({ variables, accent = "cyan" }: VariablesPanelPro
       {Object.entries(variables).map(([key, val]) => (
         <div
           key={key}
-          className="flex items-center gap-1.5 bg-white/5 backdrop-blur border border-white/10 rounded-lg px-2 py-1"
+          className="glass-field flex items-center gap-1.5 rounded-xl px-2 py-1"
         >
           <span className={`${keyColor} font-mono text-xs`}>{key}</span>
           <span className="text-slate-400 text-xs">=</span>

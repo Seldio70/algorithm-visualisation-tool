@@ -109,15 +109,15 @@ export function AlgorithmSidebar({
   return (
     <aside
       aria-label="Algorithm exercises"
-      className={`themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} w-full max-h-[40dvh] overflow-y-auto border-b border-slate-800 bg-slate-950/95 sm:max-h-none sm:w-64 sm:shrink-0 sm:border-r sm:border-b-0`}
+      className={`glass-sidebar themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} w-full max-h-[40dvh] overflow-y-auto border-b sm:max-h-none sm:w-64 sm:shrink-0 sm:border-r sm:border-b-0`}
     >
-      <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-950/95 p-3 backdrop-blur">
+      <div className="glass-header sticky top-0 z-10 border-b p-3">
         <div className="mb-2.5 flex items-center justify-between px-0.5">
           <div>
             <p className="text-sm font-semibold text-slate-200">Exercises</p>
             <p className="text-[11px] text-slate-500">{algorithms.length} visualizations</p>
           </div>
-          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${a.bg} ${a.text} ${a.border}`}>
+          <span className={`glass-control rounded-full px-2 py-0.5 text-[10px] font-semibold ${a.text}`}>
             V1
           </span>
         </div>
@@ -140,7 +140,7 @@ export function AlgorithmSidebar({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Find an exercise..."
-            className={`w-full rounded-lg border border-slate-800 bg-slate-900 py-2 pr-8 pl-8 text-xs text-slate-200 outline-none placeholder:text-slate-600 focus:border-slate-700 focus-visible:ring-1 ${focusRing}`}
+            className={`glass-field w-full rounded-xl py-2 pr-8 pl-8 text-xs text-slate-200 outline-none placeholder:text-slate-600 focus:border-white/20 focus-visible:ring-1 ${focusRing}`}
           />
           {!query && (
             <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-slate-700 px-1.5 py-0.5 font-mono text-[9px] text-slate-500">
@@ -154,7 +154,7 @@ export function AlgorithmSidebar({
         {categories.map((category) => (
           <section key={category} aria-labelledby={`sidebar-${category.replace(/\s+/g, "-").toLowerCase()}`} className="mb-4 last:mb-1">
             <div className="mb-1.5 flex items-center gap-2 px-1.5">
-              <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-900 text-slate-500">
+              <span className="glass-control flex h-5 w-5 items-center justify-center rounded-md text-slate-500">
                 <CategoryIcon category={category} />
               </span>
               <h2
@@ -179,8 +179,8 @@ export function AlgorithmSidebar({
                     title={`${algo.meta.name} — ${algo.meta.difficulty}, average ${algo.meta.timeComplexity.average}`}
                     className={`relative flex w-full items-center gap-2.5 overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ${focusRing} ${
                       isSelected
-                        ? `${a.bg} ${a.border} text-white`
-                        : "border-transparent text-slate-400 hover:border-slate-800 hover:bg-slate-900 hover:text-slate-200"
+                        ? `${a.bg} ${a.border} text-white shadow-lg shadow-black/20 backdrop-blur-xl`
+                        : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.05] hover:text-slate-200"
                     }`}
                   >
                     {isSelected && <span aria-hidden="true" className={`absolute inset-y-2 left-0 w-0.5 rounded-r ${activeBar}`} />}
@@ -189,7 +189,7 @@ export function AlgorithmSidebar({
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border font-mono text-[11px] font-semibold ${
                         isSelected
                           ? activeNumber
-                          : "border-slate-800 bg-slate-900 text-slate-500"
+                          : "glass-control border-white/10 text-slate-500"
                       }`}
                     >
                       {String(exerciseNumber).padStart(2, "0")}

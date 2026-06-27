@@ -14,10 +14,10 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <nav className="border-b border-slate-800 px-6 py-4 flex items-center justify-between bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+    <div className="glass-canvas min-h-screen text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <nav className="glass-header sticky top-0 z-50 flex items-center justify-between border-b px-6 py-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-cyan-500 rounded-xl flex items-center justify-center">
+          <div className="glass-logo flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500 text-cyan-300">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
@@ -30,7 +30,7 @@ export function LandingPage() {
           </Link>
           <Link
             to="/learn"
-            className="text-sm px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold transition-colors duration-300"
+            className="glass-logo rounded-xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-px hover:bg-cyan-400"
           >
             Open App
           </Link>
@@ -46,7 +46,7 @@ export function LandingPage() {
         >
           Understand algorithms,
           <br />
-          <span className="text-cyan-400">not just memorize them</span>
+          <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-violet-400 bg-clip-text text-transparent">not just memorize them</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -63,7 +63,7 @@ export function LandingPage() {
         >
           <Link
             to="/learn/bubble-sort"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-lg transition-colors duration-300 shadow-lg shadow-cyan-500/25"
+            className="glass-logo inline-flex items-center gap-2 rounded-2xl bg-cyan-500 px-8 py-4 text-lg font-bold text-slate-950 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:-translate-y-1 hover:bg-cyan-400 hover:shadow-cyan-400/30"
           >
             Start Learning — it's free
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -86,7 +86,8 @@ export function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
-              className="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6"
+              whileHover={{ y: -5, scale: 1.01 }}
+              className="glass-card rounded-3xl p-6"
             >
               <div className="text-2xl mb-3">{f.icon}</div>
               <h3 className="font-semibold mb-2">{f.title}</h3>
@@ -99,7 +100,7 @@ export function LandingPage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 mb-16"
+          className="glass-panel mb-16 rounded-3xl p-6"
         >
           <div className="flex items-end justify-center gap-2 h-32 mb-4">
             {[64, 34, 25, 12, 22, 11, 90].map((v, i) => (
@@ -125,32 +126,32 @@ export function LandingPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+              className="glass-field flex-1 rounded-2xl px-4 py-2.5 text-white outline-none placeholder:text-slate-500 transition-colors focus:border-cyan-500/50"
             />
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-medium transition-colors duration-300"
+              className="glass-control rounded-2xl px-6 py-2.5 font-medium transition-colors duration-300"
             >
               Notify me
             </button>
           </form>
         </div>
 
-        <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-8 text-center">
+        <div className="glass-panel rounded-3xl border-violet-400/20 p-8 text-center">
           <h2 className="text-2xl font-bold mb-2 text-violet-300">Built for 42 Tirana</h2>
           <p className="text-slate-400 mb-6 max-w-xl mx-auto">
             A dedicated section with algorithms from the 42 curriculum — linked lists, malloc, flood fill, maze BFS, and more.
           </p>
           <Link
             to="/42"
-            className="inline-flex px-6 py-3 rounded-xl bg-violet-500 hover:bg-violet-400 text-white font-semibold transition-colors duration-300"
+            className="glass-logo inline-flex rounded-2xl bg-violet-500 px-6 py-3 font-semibold text-white shadow-lg shadow-violet-500/20 transition-all duration-300 hover:-translate-y-px hover:bg-violet-400"
           >
             Explore 42 Section →
           </Link>
         </div>
       </section>
 
-      <footer className="border-t border-slate-800 px-6 py-8 text-center text-sm text-slate-500">
+      <footer className="glass-header border-t px-6 py-8 text-center text-sm text-slate-500">
         <p>AlgoVisualisation — Learn algorithms visually. Open source, client-side, no account required.</p>
       </footer>
 
