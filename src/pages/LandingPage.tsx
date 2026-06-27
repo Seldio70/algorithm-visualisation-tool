@@ -22,7 +22,7 @@ export function LandingPage() {
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
           </div>
-          <span className="font-bold text-lg">AlgoViz</span>
+          <span className="font-bold text-lg">AlgoVisualisation</span>
         </div>
         <div className="flex items-center gap-4">
           <Link to="/42" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
@@ -151,7 +151,7 @@ export function LandingPage() {
       </section>
 
       <footer className="border-t border-slate-800 px-6 py-8 text-center text-sm text-slate-500">
-        <p>AlgoViz — Learn algorithms visually. Open source, client-side, no account required.</p>
+        <p>AlgoVisualisation — Learn algorithms visually. Open source, client-side, no account required.</p>
       </footer>
 
       <Toast message={toast} onDismiss={dismissToast} />
