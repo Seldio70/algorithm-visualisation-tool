@@ -23,10 +23,10 @@ export function FortyTwoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <header className="border-b border-slate-800 px-6 py-4 flex items-center justify-between bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+    <div className="glass-canvas min-h-screen text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <header className="glass-header sticky top-0 z-50 flex items-center justify-between border-b px-6 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-violet-500 rounded-xl flex items-center justify-center">
+          <div className="glass-logo flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500 text-violet-300">
             <span className="font-bold text-sm">42</span>
           </div>
           <span className="font-bold">AlgoVisualisation × 42 Tirana</span>
@@ -37,8 +37,8 @@ export function FortyTwoPage() {
       </header>
 
       <section className="px-6 pt-16 pb-12 max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-4">
-          Built for <span className="text-violet-400">42 Tirana</span> students
+        <h1 className="mb-4 text-4xl font-bold">
+          Built for <span className="bg-gradient-to-r from-violet-300 to-fuchsia-400 bg-clip-text text-transparent">42 Tirana</span> students
         </h1>
         <p className="text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
           Algorithms you'll actually encounter in the 42 curriculum — linked lists, malloc internals,
@@ -50,7 +50,7 @@ export function FortyTwoPage() {
             <Link
               key={algo.meta.id}
               to={`/42/${algo.meta.id}`}
-              className="bg-white/5 backdrop-blur border border-violet-500/20 rounded-xl p-5 hover:border-violet-500/40 hover:bg-violet-500/5 transition-all duration-300 group"
+              className="glass-card group rounded-3xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/30"
             >
               <h3 className="font-semibold text-violet-300 group-hover:text-violet-200 mb-1">
                 {algo.meta.name}
@@ -64,7 +64,7 @@ export function FortyTwoPage() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-800 px-6 py-8 text-center text-sm text-slate-500">
+      <footer className="glass-header border-t px-6 py-8 text-center text-sm text-slate-500">
         <p>Not affiliated with 42 — built by students, for students.</p>
       </footer>
     </div>
