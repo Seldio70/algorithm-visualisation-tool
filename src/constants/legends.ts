@@ -99,3 +99,45 @@ export const FLOOD_FILL_LEGEND: LegendItem[] = [
   { tone: "visited", label: "Queued" },
   { tone: "filled", label: "Filled" },
 ];
+
+export const SPLIT_LEGEND: LegendItem[] = [
+  { tone: "current", label: "Word boundary" },
+  { tone: "comparing", label: "Scanning word" },
+  { tone: "sorted", label: "Copied" },
+  { tone: "inserting", label: "New word" },
+];
+
+export const ITOA_LEGEND: LegendItem[] = [
+  { tone: "default", label: "Empty slot" },
+  { tone: "current", label: "Writing" },
+  { tone: "sorted", label: "Written" },
+];
+
+export const ATOI_LEGEND: LegendItem[] = [
+  { tone: "visited", label: "Skipped space" },
+  { tone: "inserting", label: "Sign" },
+  { tone: "current", label: "Digit read" },
+  { tone: "sorted", label: "Parsed" },
+  { tone: "comparing", label: "Stop (non-digit)" },
+];
+
+export const UNION_LEGEND: LegendItem[] = [
+  { tone: "current", label: "Writing" },
+  { tone: "comparing", label: "Duplicate (skip)" },
+  { tone: "sorted", label: "In set" },
+  { tone: "inserting", label: "Added" },
+];
+
+export const INTER_LEGEND: LegendItem[] = [
+  { tone: "current", label: "Match / mark" },
+  { tone: "comparing", label: "Skip" },
+  { tone: "sorted", label: "In map" },
+  { tone: "visited", label: "Consumed" },
+  { tone: "inserting", label: "Printed" },
+];
+
+export const LAST_WORD_LEGEND: LegendItem[] = [
+  { tone: "comparing", label: "Trailing space" },
+  { tone: "current", label: "Word char" },
+  { tone: "sorted", label: "Last word" },
+];

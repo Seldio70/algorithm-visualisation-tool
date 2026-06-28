@@ -58,24 +58,12 @@ describe("algorithm contracts", () => {
   });
 
   it("keeps identity stable for pointer-based visualizations", () => {
-    const linked = algorithms.find(({ meta }) => meta.id === "linked-list")!;
-    const linkedSteps = linked.generateSteps(linked.meta.defaultInput);
-    expect(linkedSteps[2].elements.some(({ id }) => id === "node-25")).toBe(true);
-    expect(linkedSteps[4].elements.some(({ id }) => id === "node-30")).toBe(false);
-
-    const stackQueue = algorithms.find(({ meta }) => meta.id === "stack-queue")!;
-    const queueSteps = stackQueue.generateSteps(stackQueue.meta.defaultInput)
-      .filter(({ layoutOverride }) => layoutOverride === "queue");
-    expect(queueSteps.length).toBeGreaterThan(0);
-    expect(queueSteps.some(({ elements }) => elements.some(({ id }) => id === "queue-X"))).toBe(true);
-
-    const memory = algorithms.find(({ meta }) => meta.id === "memory-blocks")!;
-    expect(memory.generateSteps(memory.meta.defaultInput)[0].elements[0].id).toBe("b0");
-  });
-
-  it("uses fill-specific grid semantics", () => {
-    const floodFill = algorithms.find(({ meta }) => meta.id === "flood-fill")!;
-    expect(floodFill.meta.gridVariant).toBe("fill");
-    expect(floodFill.meta.legend.some(({ tone }) => tone === "filled")).toBe(true);
+    const split = algorithms.find(({ meta }) => meta.id === "ft-split")!;
+    const splitSteps = split.generateSteps(split.meta.defaultInput);
+    // Input characters keep stable ids across every step.
+    expect(splitSteps[0].elements.some(({ id }) => id === "c-0")).toBe(true);
+    expect(splitSteps.at(-1)!.elements.some(({ id }) => id === "c-0")).toBe(true);
+    // Once a word is emitted, its id (w-0) persists to the final step.
+    expect(splitSteps.at(-1)!.elements.some(({ id }) => id === "w-0")).toBe(true);
   });
 });
