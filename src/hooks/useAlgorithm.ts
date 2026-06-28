@@ -1,5 +1,21 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { AlgorithmDefinition, Step } from "../types";
+import {
+  DEFAULT_PLAYBACK_SPEED,
+  PLAYBACK_SPEED_KEY,
+  PLAYBACK_SPEEDS,
+} from "../constants/playback";
+
+function readStoredSpeed(): number {
+  try {
+    const stored = Number(localStorage.getItem(PLAYBACK_SPEED_KEY));
+    return PLAYBACK_SPEEDS.some(({ delay }) => delay === stored)
+      ? stored
+      : DEFAULT_PLAYBACK_SPEED;
+  } catch {
+    return DEFAULT_PLAYBACK_SPEED;
+  }
+}
 
 export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
   const steps = useMemo<Step[]>(
@@ -8,7 +24,7 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
   );
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(700);
+  const [speed, setSpeedState] = useState(readStoredSpeed);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -32,7 +48,8 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const target = e.target instanceof HTMLElement ? e.target : null;
+      if (target?.closest("input, textarea, select, button, a, [contenteditable='true']")) return;
       if (e.code === "Space") {
         e.preventDefault();
         if (isPlaying) {
@@ -74,6 +91,24 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
     setIsPlaying(false);
   }, [steps.length]);
 
+  const seek = useCallback((stepIndex: number) => {
+    const lastStep = Math.max(0, steps.length - 1);
+    setCurrentStep(Math.min(lastStep, Math.max(0, Math.round(stepIndex))));
+    setIsPlaying(false);
+  }, [steps.length]);
+
+  const setSpeed = useCallback((nextSpeed: number) => {
+    const validSpeed = PLAYBACK_SPEEDS.some(({ delay }) => delay === nextSpeed)
+      ? nextSpeed
+      : DEFAULT_PLAYBACK_SPEED;
+    setSpeedState(validSpeed);
+    try {
+      localStorage.setItem(PLAYBACK_SPEED_KEY, String(validSpeed));
+    } catch {
+      // Playback still works when storage is unavailable.
+    }
+  }, []);
+
   const togglePlay = useCallback(() => {
     if (isPlaying) {
       setIsPlaying(false);
@@ -99,6 +134,7 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
     reset,
     prev,
     next,
+    seek,
     togglePlay,
   };
 }

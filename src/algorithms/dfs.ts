@@ -1,6 +1,7 @@
 import type { AlgorithmDefinition, Step, ElementState, GraphEdge, VisualElement } from "../types";
 import { finalStep } from "./helpers";
 import { SHARED_GRAPH_EDGES, SHARED_GRAPH_LABELS, SHARED_GRAPH_LAYOUT, edgeId } from "./graphConfig";
+import { GRAPH_LEGEND } from "../constants/legends";
 
 function makeGraphElements(states: Record<number, ElementState>): VisualElement[] {
   return SHARED_GRAPH_LABELS.map((label, i) => ({
@@ -23,7 +24,7 @@ function buildEdges(nodeStates: Record<number, ElementState>, activeEdge?: [numb
   });
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const visited = new Set<number>();
@@ -53,7 +54,7 @@ function generateSteps(_input: number[]): Step[] {
       id: stepId++,
       elements: makeGraphElements(nodeStates),
       edges: buildEdges(nodeStates),
-      highlightedLines: [3, 4],
+      highlightedLines: [3, 4, 5],
       explanation: `Pop ${SHARED_GRAPH_LABELS[node]} from stack. Mark visited. Push unvisited neighbors.`,
       variables: { current: SHARED_GRAPH_LABELS[node], visited: [...visited].map((n) => SHARED_GRAPH_LABELS[n]).join(", ") },
       callStack: [`dfs(${SHARED_GRAPH_LABELS[node]})`],
@@ -73,23 +74,23 @@ function generateSteps(_input: number[]): Step[] {
         id: stepId++,
         elements: makeGraphElements(pushStates),
         edges: buildEdges(pushStates, [node, n]),
-        highlightedLines: [5],
+        highlightedLines: [6, 7],
         explanation: `Push neighbor ${SHARED_GRAPH_LABELS[n]} onto stack for later exploration.`,
         variables: { pushed: SHARED_GRAPH_LABELS[n], stack: stack.map((x) => SHARED_GRAPH_LABELS[x]).join(", ") },
       });
     }
   }
 
-  const finalStates = Object.fromEntries(SHARED_GRAPH_LABELS.map((_, i) => [i, "path" as ElementState]));
+  const finalStates = Object.fromEntries(SHARED_GRAPH_LABELS.map((_, i) => [i, "sorted" as ElementState]));
   steps.push({
     ...finalStep(
       stepId,
       makeGraphElements(finalStates),
       `✅ DFS completed. Visit order depends on stack ordering — goes deep before wide.`,
       "DFS uses less memory than BFS for deep graphs and is key for cycle detection, topological sort, and maze solving.",
-      6
+      8
     ),
-    edges: SHARED_GRAPH_EDGES.map(([a, b]) => ({ ...edgeId(a, b), state: "path" as ElementState })),
+    edges: SHARED_GRAPH_EDGES.map(([a, b]) => ({ ...edgeId(a, b), state: "visited" as ElementState })),
   });
 
   return steps;
@@ -102,12 +103,13 @@ export const dfs: AlgorithmDefinition = {
     category: "Graph",
     difficulty: "Intermediate",
     layout: "graph",
+    legend: GRAPH_LEGEND,
     graphLayout: SHARED_GRAPH_LAYOUT,
     timeComplexity: { best: "O(V+E)", average: "O(V+E)", worst: "O(V+E)" },
     spaceComplexity: "O(V)",
     description: "Explores as far as possible along each branch before backtracking. Uses a stack or recursion.",
     defaultInput: [0],
-    code: `function dfs(graph, node, visited = new Set()) {\n  visited.add(node);\n  for (const neighbor of graph[node]) {\n    if (!visited.has(neighbor)) dfs(graph, neighbor, visited);\n  }\n}`,
+    code: `function dfs(graph, start) {\n  const stack = [start], visited = new Set();\n  while (stack.length) {\n    const node = stack.pop();\n    if (visited.has(node)) continue; visited.add(node);\n    for (const neighbor of graph[node])\n      if (!visited.has(neighbor)) stack.push(neighbor);\n}`,
   },
   generateSteps,
 };

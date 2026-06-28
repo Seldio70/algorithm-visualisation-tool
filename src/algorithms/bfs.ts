@@ -1,6 +1,7 @@
 import type { AlgorithmDefinition, Step, ElementState, GraphEdge, VisualElement } from "../types";
 import { finalStep } from "./helpers";
 import { SHARED_GRAPH_EDGES, SHARED_GRAPH_LABELS, SHARED_GRAPH_LAYOUT, edgeId } from "./graphConfig";
+import { GRAPH_LEGEND } from "../constants/legends";
 
 function makeGraphElements(states: Record<number, ElementState>): VisualElement[] {
   return SHARED_GRAPH_LABELS.map((label, i) => ({
@@ -23,7 +24,7 @@ function buildEdges(nodeStates: Record<number, ElementState>, activeEdge?: [numb
   });
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const visited = new Set<number>();
@@ -33,7 +34,7 @@ function generateSteps(_input: number[]): Step[] {
     id: stepId++,
     elements: makeGraphElements({ 0: "current" }),
     edges: buildEdges({ 0: "current" }),
-    highlightedLines: [1, 2],
+    highlightedLines: [1, 2, 3],
     explanation: `BFS explores a graph level by level using a queue. Starting from node A (index 0).`,
     variables: { queue: "A", visited: "A" },
   });
@@ -51,7 +52,7 @@ function generateSteps(_input: number[]): Step[] {
       id: stepId++,
       elements: makeGraphElements(nodeStates),
       edges: buildEdges(nodeStates),
-      highlightedLines: [3, 4],
+      highlightedLines: [4, 5, 6],
       explanation: `Dequeue node ${SHARED_GRAPH_LABELS[node]}. Visit all unvisited neighbors.`,
       variables: { current: SHARED_GRAPH_LABELS[node], queueSize: queue.length },
     });
@@ -72,23 +73,23 @@ function generateSteps(_input: number[]): Step[] {
         id: stepId++,
         elements: makeGraphElements(discoverStates),
         edges: buildEdges(discoverStates, [node, neighbor]),
-        highlightedLines: [5, 6],
+        highlightedLines: [7, 8, 9],
         explanation: `Discover neighbor ${SHARED_GRAPH_LABELS[neighbor]} from ${SHARED_GRAPH_LABELS[node]}. Enqueue it.`,
         variables: { discovered: SHARED_GRAPH_LABELS[neighbor], queue: queue.map((n) => SHARED_GRAPH_LABELS[n]).join(", ") },
       });
     }
   }
 
-  const finalStates = Object.fromEntries(SHARED_GRAPH_LABELS.map((_, i) => [i, "path" as ElementState]));
+  const finalStates = Object.fromEntries(SHARED_GRAPH_LABELS.map((_, i) => [i, "sorted" as ElementState]));
   steps.push({
     ...finalStep(
       stepId,
       makeGraphElements(finalStates),
       `✅ BFS visited all reachable nodes in level order: ${SHARED_GRAPH_LABELS.join(" → ")}.`,
       "BFS finds shortest paths in unweighted graphs. It's the foundation of maze solving, social network degrees, and GPS routing.",
-      7
+      12
     ),
-    edges: SHARED_GRAPH_EDGES.map(([a, b]) => ({ ...edgeId(a, b), state: "path" as ElementState })),
+    edges: SHARED_GRAPH_EDGES.map(([a, b]) => ({ ...edgeId(a, b), state: "visited" as ElementState })),
   });
 
   return steps;
@@ -101,6 +102,7 @@ export const bfs: AlgorithmDefinition = {
     category: "Graph",
     difficulty: "Intermediate",
     layout: "graph",
+    legend: GRAPH_LEGEND,
     graphLayout: SHARED_GRAPH_LAYOUT,
     timeComplexity: { best: "O(V+E)", average: "O(V+E)", worst: "O(V+E)" },
     spaceComplexity: "O(V)",

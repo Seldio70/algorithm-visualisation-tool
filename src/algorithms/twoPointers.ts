@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, finalStep } from "./helpers";
+import { SEARCH_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -7,7 +8,7 @@ function generateSteps(input: number[]): Step[] {
   let stepId = 0;
   let left = 0;
   let right = arr.length - 1;
-  const target = arr[Math.floor(arr.length / 2)] + arr[Math.ceil(arr.length / 2)];
+  const target = 14;
 
   steps.push({
     id: stepId++,
@@ -64,7 +65,7 @@ function generateSteps(input: number[]): Step[] {
       makeElements(arr),
       `No pair sums to ${target}. Pointers crossed without a match.`,
       "When two pointers cross, you've checked all valid pairs in O(n) — much better than O(n²) brute force.",
-      6
+      9
     )
   );
 
@@ -78,11 +79,12 @@ export const twoPointers: AlgorithmDefinition = {
     category: "Classic",
     difficulty: "Intermediate",
     layout: "linear",
+    legend: SEARCH_LEGEND,
     timeComplexity: { best: "O(n)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(1)",
     description: "Uses two pointers moving toward each other (or same direction) to solve problems in O(n) on sorted arrays.",
     defaultInput: [1, 2, 4, 6, 8, 9, 11, 15],
-    code: `function twoSum(arr, target) {\n  let left = 0, right = arr.length - 1;\n  while (left < right) {\n    const sum = arr[left] + arr[right];\n    if (sum === target) return [left, right];\n    else if (sum < target) left++;\n    else right--;\n  }\n}`,
+    code: `function twoSum(arr, target) {\n  let left = 0, right = arr.length - 1;\n  while (left < right) {\n    const sum = arr[left] + arr[right];\n    if (sum === target) return [left, right];\n    else if (sum < target) left++;\n    else right--;\n  }\n  return null;\n}`,
   },
   generateSteps,
 };

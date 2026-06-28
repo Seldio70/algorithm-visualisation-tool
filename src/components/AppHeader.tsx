@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import type { RefObject } from "react";
 import type { ThemeAccent } from "../types";
 import { ACCENT } from "../constants/theme";
 
@@ -8,6 +9,9 @@ interface AppHeaderProps {
   totalSteps?: number;
   accent?: ThemeAccent;
   showNav?: boolean;
+  sidebarOpen?: boolean;
+  sidebarId?: string;
+  sidebarButtonRef?: RefObject<HTMLButtonElement | null>;
 }
 
 export function AppHeader({
@@ -16,6 +20,9 @@ export function AppHeader({
   totalSteps,
   accent = "cyan",
   showNav = true,
+  sidebarOpen = false,
+  sidebarId = "algorithm-sidebar",
+  sidebarButtonRef,
 }: AppHeaderProps) {
   const logoBg = accent === "violet" ? "bg-violet-500" : "bg-cyan-500";
   const logoGlow = accent === "violet" ? "text-violet-400" : "text-cyan-400";
@@ -25,8 +32,13 @@ export function AppHeader({
       <div className="flex items-center gap-3">
         {showNav && (
           <button
+            ref={sidebarButtonRef}
+            type="button"
             onClick={onToggleSidebar}
-            className="glass-control rounded-xl p-1.5 text-slate-400 transition-colors duration-300 hover:text-white"
+            aria-label={sidebarOpen ? "Close exercise navigation" : "Open exercise navigation"}
+            aria-expanded={sidebarOpen}
+            aria-controls={sidebarId}
+            className="glass-control flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 transition-colors duration-300 hover:text-white sm:h-8 sm:w-8"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="3" y1="6" x2="21" y2="6" />

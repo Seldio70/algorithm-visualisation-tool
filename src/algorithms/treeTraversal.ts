@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../types";
 import { finalStep } from "./helpers";
+import { TREE_LEGEND } from "../constants/legends";
 
 /** Heap-array representation of a BST (index 0 = root). */
 const TREE = [8, 3, 10, 1, 6, 0, 14, 0, 0, 4, 7, 0, 0, 0, 13];
@@ -18,7 +19,7 @@ function heapToElements(states: Record<number, ElementState>): VisualElement[] {
   return elements;
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const visitedOrder: number[] = [];
@@ -49,7 +50,7 @@ function generateSteps(_input: number[]): Step[] {
     steps.push({
       id: stepId++,
       elements: heapToElements(nodeStates),
-      highlightedLines: [2, 3],
+      highlightedLines: [3, 4],
       explanation: `Visit node ${TREE[idx]}. Inorder visits left subtree first, then root, then right.`,
       variables: { visited: visitedOrder.join(", ") },
       callStack: stack,
@@ -72,7 +73,7 @@ function generateSteps(_input: number[]): Step[] {
       heapToElements(finalStates),
       `✅ Inorder traversal: [${visitedOrder.join(", ")}]. For a BST, inorder gives sorted order!`,
       "Tree traversals (inorder, preorder, postorder) are fundamental for parsing, file systems, and expression trees. Inorder on a BST always yields sorted values.",
-      4
+      6
     )
   );
 
@@ -86,9 +87,10 @@ export const treeTraversal: AlgorithmDefinition = {
     category: "Tree",
     difficulty: "Intermediate",
     layout: "tree",
+    legend: TREE_LEGEND,
     timeComplexity: { best: "O(n)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(h)",
-    description: "Visits every node in a binary tree in a defined order: inorder (L-Root-R), preorder (Root-L-R), or postorder (L-R-Root).",
+    description: "Visits every node in a binary search tree using inorder traversal: left subtree, root, then right subtree.",
     defaultInput: [8, 3, 10, 1, 6, 14],
     code: `function inorder(node) {\n  if (!node) return;\n  inorder(node.left);\n  visit(node);\n  inorder(node.right);\n}`,
   },

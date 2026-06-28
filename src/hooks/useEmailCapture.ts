@@ -11,14 +11,22 @@ export function useEmailCapture() {
       setToast("Please enter a valid email address.");
       return false;
     }
-    const existing: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-    if (existing.includes(trimmed)) {
-      setToast("You're already on the list!");
+    try {
+      const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+      const existing = Array.isArray(parsed)
+        ? parsed.filter((value): value is string => typeof value === "string")
+        : [];
+      if (existing.includes(trimmed)) {
+        setToast("This email is already saved on this device.");
+        return true;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, trimmed]));
+      setToast("Saved on this device only. Nothing was submitted or sent.");
       return true;
+    } catch {
+      setToast("Your browser could not save this email locally.");
+      return false;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, trimmed]));
-    setToast("Thanks! We'll notify you when new algorithms drop.");
-    return true;
   }, []);
 
   const dismissToast = useCallback(() => setToast(null), []);

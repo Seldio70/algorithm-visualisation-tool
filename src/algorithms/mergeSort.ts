@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, finalStep } from "./helpers";
+import { MERGE_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -108,11 +109,12 @@ export const mergeSort: AlgorithmDefinition = {
     category: "Sorting",
     difficulty: "Intermediate",
     layout: "array",
+    legend: MERGE_LEGEND,
     timeComplexity: { best: "O(n log n)", average: "O(n log n)", worst: "O(n log n)" },
     spaceComplexity: "O(n)",
     description: "Divides the array in half recursively, sorts each half, then merges them. Stable and predictable O(n log n).",
     defaultInput: [38, 27, 43, 3, 9, 82, 10],
-    code: `function mergeSort(arr, lo, hi) {\n  if (lo >= hi) return;\n  const mid = Math.floor((lo + hi) / 2);\n  mergeSort(arr, lo, mid);\n  mergeSort(arr, mid + 1, hi);\n  merge(arr, lo, mid, hi);\n}\nfunction merge(arr, lo, mid, hi) {\n  // merge two sorted halves\n}`,
+    code: `function mergeSort(arr, lo, hi) {\n  if (lo >= hi) return;\n  const mid = Math.floor((lo + hi) / 2); // split\n  mergeSort(arr, lo, mid); mergeSort(arr, mid + 1, hi);\n  merge(arr, lo, mid, hi); // merge both sorted halves\n  return arr;\n}`,
   },
   generateSteps,
 };

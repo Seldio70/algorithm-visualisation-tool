@@ -1,4 +1,4 @@
-# AlgoVisualisation
+# AlgoVisualisation V1
 
 An interactive web app for learning algorithms step by step. Pick an algorithm, press play, and watch the data structure update on each line of code — with explanations, variable panels, and color-coded visuals.
 
@@ -13,7 +13,7 @@ AlgoVisualisation is an **algorithm learning workspace**, not a generic code run
 ### Core experience
 
 1. **Choose an algorithm** from the sidebar (sorting, searching, graphs, trees, and more).
-2. **Step through the run** with play/pause, next/previous, or keyboard shortcuts.
+2. **Step through the run** with play/pause, next/previous, keyboard shortcuts, or the seekable timeline.
 3. **Watch the visualization update** — arrays swap, graph nodes get visited, trees grow, grids flood-fill, etc.
 4. **Read the explanation** for the current step in plain language.
 5. **Follow the code** — the relevant lines are highlighted in the code panel.
@@ -44,7 +44,7 @@ Algorithms render with the layout that fits their data structure:
 | **Tree (SVG)** | BST and traversals | BST Insert, In/Pre/Post-order |
 | **Grid** | 2D pathfinding and flood fill | Flood Fill, BFS Maze |
 | **Linked list** | Pointer-based structures | Linked List (42) |
-| **Stack** | LIFO operations | Stack & Queue (42) |
+| **Stack / queue** | LIFO and FIFO operations | Stack & Queue (42) |
 | **Memory blocks** | Allocation visualizations | Memory Blocks (42) |
 
 Graph and tree visualizers use SVG with node states (current, visited, path, highlight) and optional edge weights. Dijkstra highlights **only the reconstructed shortest path** to the target node, with numbered step labels on path nodes.
@@ -69,7 +69,7 @@ Linked List, Stack & Queue, Merge Sort, Quick Sort, Flood Fill, BFS Maze, Memory
 
 ## Prerequisites
 
-- **Node.js 18+** (20 LTS recommended)
+- **Node.js 20.19+** (Node 22 recommended)
 - **npm** (comes with Node)
 
 Check your versions:
@@ -132,6 +132,16 @@ Serves the `dist/` folder so you can test the production build before deploying.
 npm run lint
 ```
 
+### 7. Test and validate V1
+
+```bash
+npm run test
+npm run test:e2e
+npm run check
+```
+
+`npm run check` runs lint, the algorithm/component contract suite, and the production build. Playwright smoke tests cover desktop and iPhone-sized flows separately.
+
 ---
 
 ## Deploying
@@ -144,7 +154,7 @@ Typical flow:
 2. Connect the repo in Vercel (or let an existing project auto-deploy).
 3. Vercel runs `npm run build` and serves `dist/`.
 
-No environment variables are required for basic local or production use.
+No environment variables are required. The optional landing-page email field stores its value only in the visitor's browser; it does not submit or send data.
 
 ---
 
@@ -194,6 +204,8 @@ While focused on the workspace (not typing in an input):
 | **→** | Next step |
 | **←** | Previous step |
 | **R** | Reset to step 0 |
+
+Playback speed is saved locally on the current device. The current algorithm remains encoded in the URL, and `/learn` remembers the last valid exercise.
 
 ---
 

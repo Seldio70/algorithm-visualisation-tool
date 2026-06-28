@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, finalStep } from "./helpers";
+import { QUICK_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -109,11 +110,12 @@ export const quickSort: AlgorithmDefinition = {
     category: "Sorting",
     difficulty: "Intermediate",
     layout: "array",
+    legend: QUICK_LEGEND,
     timeComplexity: { best: "O(n log n)", average: "O(n log n)", worst: "O(n²)" },
     spaceComplexity: "O(log n)",
     description: "Picks a pivot, partitions the array around it, then recursively sorts the partitions. Fast in practice.",
     defaultInput: [8, 3, 1, 7, 0, 10, 2],
-    code: `function quickSort(arr, lo, hi) {\n  if (lo >= hi) return;\n  const p = partition(arr, lo, hi);\n  quickSort(arr, lo, p - 1);\n  quickSort(arr, p + 1, hi);\n}\nfunction partition(arr, lo, hi) {\n  const pivot = arr[hi];\n  // place pivot in final position\n}`,
+    code: `function quickSort(arr, lo, hi) {\n  const pivot = arr[hi]; // begin partition\n  for (let j = lo; j < hi; j++) {\n    if (arr[j] <= pivot)\n      moveToLeftPartition(arr, j);\n  } // place pivot in its final position\n  quickSort(left); quickSort(right);\n}`,
   },
   generateSteps,
 };

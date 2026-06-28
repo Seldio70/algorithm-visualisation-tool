@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { mainAlgorithms, algorithmMap } from "../algorithms";
 import { useAlgorithm } from "../hooks/useAlgorithm";
@@ -12,18 +12,31 @@ import { Controls } from "../components/Controls";
 import { StepExplanation } from "../components/StepExplanation";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
 import type { ThemeAccent, AlgorithmDefinition } from "../types";
+import { usePageMetadata } from "../hooks/usePageMetadata";
+import { NotFoundPage } from "./NotFoundPage";
+
+const LAST_LEARN_KEY = "algoviz-last-learn-id-v1";
+
+function storedLearnId(defaultId: string): string {
+  try {
+    const stored = localStorage.getItem(LAST_LEARN_KEY);
+    return stored && mainAlgorithms.some(({ meta }) => meta.id === stored) ? stored : defaultId;
+  } catch {
+    return defaultId;
+  }
+}
 
 export function LearnPage() {
   const { algorithmId } = useParams<{ algorithmId: string }>();
   const defaultId = mainAlgorithms[0].meta.id;
 
   if (!algorithmId) {
-    return <Navigate to={`/learn/${defaultId}`} replace />;
+    return <Navigate to={`/learn/${storedLearnId(defaultId)}`} replace />;
   }
 
   const algo = algorithmMap[algorithmId];
   if (!algo || algo.meta.category === "42 Tirana") {
-    return <Navigate to={`/learn/${defaultId}`} replace />;
+    return <NotFoundPage message="That learning exercise could not be found." />;
   }
 
   return <AlgorithmWorkspace key={algo.meta.id} algo={algo} selectedId={algorithmId} basePath="/learn" sidebarAlgorithms={mainAlgorithms} />;
@@ -42,6 +55,8 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
   const [sidebarOpen, setSidebarOpen] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 640px)").matches : true
   );
+  const sidebarContainerRef = useRef<HTMLDivElement>(null);
+  const sidebarButtonRef = useRef<HTMLButtonElement>(null);
   const accent: ThemeAccent = forceAccent ?? algo.meta.accent ?? "cyan";
   const a = ACCENT[accent];
 
@@ -55,10 +70,12 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
     reset,
     prev,
     next,
+    seek,
     togglePlay,
   } = useAlgorithm(algo);
 
   const { meta } = algo;
+  usePageMetadata(`${meta.name} · AlgoVisualisation`, accent);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 640px)");
@@ -67,6 +84,48 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
     return () => mq.removeEventListener("change", handler);
   }, []);
 
+  useEffect(() => {
+    if (basePath !== "/learn") return;
+    try {
+      localStorage.setItem(LAST_LEARN_KEY, selectedId);
+    } catch {
+      // The URL remains the source of truth when storage is unavailable.
+    }
+  }, [basePath, selectedId]);
+
+  useEffect(() => {
+    if (!sidebarOpen || window.matchMedia("(min-width: 640px)").matches) return;
+    const container = sidebarContainerRef.current;
+    const drawerTrigger = sidebarButtonRef.current;
+    const focusableSelector = "a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex='-1'])";
+    container?.querySelector<HTMLElement>(focusableSelector)?.focus();
+
+    const handleDrawerKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !container) return;
+      const focusable = [...container.querySelectorAll<HTMLElement>(focusableSelector)];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleDrawerKeys);
+    return () => {
+      document.removeEventListener("keydown", handleDrawerKeys);
+      drawerTrigger?.focus();
+    };
+  }, [sidebarOpen]);
+
   return (
     <div className="glass-canvas flex h-dvh flex-col overflow-hidden text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <AppHeader
@@ -74,16 +133,31 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
         currentStep={currentStep}
         totalSteps={steps.length}
         accent={accent}
+        sidebarOpen={sidebarOpen}
+        sidebarButtonRef={sidebarButtonRef}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden flex-col sm:flex-row">
         {sidebarOpen && (
-          <AlgorithmSidebar
-            algorithms={sidebarAlgorithms}
-            selectedId={selectedId}
-            basePath={basePath}
-            accent={accent}
-          />
+          <>
+            <button
+              type="button"
+              aria-label="Close exercise navigation"
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-sm sm:hidden"
+            />
+            <div
+              ref={sidebarContainerRef}
+              className="fixed inset-y-3 left-3 top-16 z-40 w-[min(20rem,calc(100vw-1.5rem))] sm:static sm:z-auto sm:h-full sm:w-64 sm:shrink-0"
+            >
+              <AlgorithmSidebar
+                algorithms={sidebarAlgorithms}
+                selectedId={selectedId}
+                basePath={basePath}
+                accent={accent}
+              />
+            </div>
+          </>
         )}
 
         <main className="flex-1 flex flex-col min-h-0 overflow-hidden min-w-0">
@@ -101,12 +175,16 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                 <p className="text-xs text-violet-400/80 mt-0.5 line-clamp-1">42 Project: {meta.fortyTwoNote}</p>
               )}
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex gap-1 shrink-0" role="tablist" aria-label="Exercise view">
               {(["visualizer", "about"] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
-                  className={`rounded-xl px-3 py-1.5 text-xs font-medium capitalize transition-colors duration-300 ${
+                  role="tab"
+                  id={`tab-${v}`}
+                  aria-selected={view === v}
+                  aria-controls={`panel-${v}`}
+                  className={`min-h-11 rounded-xl px-3 py-1.5 text-xs font-medium capitalize transition-colors duration-300 sm:min-h-0 ${
                     view === v ? `${a.bg} ${a.text} border ${a.border} shadow-inner` : "glass-control text-slate-400 hover:text-white"
                   }`}
                 >
@@ -117,7 +195,7 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
           </div>
 
           {view === "about" ? (
-            <div className={`themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} flex-1 overflow-auto p-4 sm:p-6`}>
+            <div id="panel-about" role="tabpanel" aria-labelledby="tab-about" className={`themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} flex-1 overflow-auto p-4 sm:p-6`}>
               <div className="max-w-2xl space-y-6">
                 <p className="text-slate-300 text-sm leading-relaxed">{meta.description}</p>
                 {meta.fortyTwoNote && (
@@ -146,7 +224,7 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
               </div>
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 lg:flex-row lg:gap-3 lg:p-3">
+            <div id="panel-visualizer" role="tabpanel" aria-labelledby="tab-visualizer" className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 lg:flex-row lg:gap-3 lg:p-3">
               <div className="glass-panel flex min-w-0 shrink-0 flex-col overflow-hidden rounded-2xl lg:max-w-[52%] lg:flex-1 lg:shrink">
                 <div className="flex shrink-0 flex-col border-b border-white/10 bg-white/[0.025] p-3 sm:p-4 lg:min-h-0 lg:flex-1">
                   <div className="h-36 sm:h-40 lg:h-auto lg:flex-1 lg:min-h-[12rem] flex items-center justify-center overflow-hidden">
@@ -156,14 +234,15 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                         layout={meta.layout}
                         gridCols={meta.gridCols}
                         graphLayout={meta.graphLayout}
+                        gridVariant={meta.gridVariant}
                         accent={accent}
                       />
                     )}
                   </div>
-                  <Legend layout={meta.layout} />
+                  <Legend items={meta.legend} />
                 </div>
 
-                {step && <StepExplanation explanation={step.explanation} accent={accent} />}
+                {step && <StepExplanation explanation={step.explanation} accent={accent} isPlaying={isPlaying} />}
 
                 <div className="glass-subtle shrink-0 border-t">
                   <Controls
@@ -175,6 +254,7 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                     onPrev={prev}
                     onTogglePlay={togglePlay}
                     onNext={next}
+                    onSeek={seek}
                     onSpeedChange={setSpeed}
                     accent={accent}
                     compact

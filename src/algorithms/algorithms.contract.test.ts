@@ -1,0 +1,81 @@
+import { describe, expect, it } from "vitest";
+import { algorithms } from "./index";
+
+describe("algorithm contracts", () => {
+  it.each(algorithms.map((algorithm) => [algorithm.meta.id, algorithm] as const))(
+    "%s generates structurally valid steps",
+    (_, algorithm) => {
+      const steps = algorithm.generateSteps(algorithm.meta.defaultInput);
+      const codeLineCount = algorithm.meta.code.split("\n").length;
+
+      expect(steps.length).toBeGreaterThan(0);
+      expect(algorithm.meta.legend.length).toBeGreaterThan(0);
+
+      steps.forEach((step, index) => {
+        expect(step.id).toBe(index);
+        expect(step.explanation.trim()).not.toBe("");
+        expect(new Set(step.elements.map((element) => element.id)).size).toBe(step.elements.length);
+
+        step.highlightedLines.forEach((line) => {
+          expect(line).toBeGreaterThanOrEqual(1);
+          expect(line).toBeLessThanOrEqual(codeLineCount);
+        });
+
+        const elementIds = new Set(step.elements.map((element) => element.id));
+        step.pointers?.forEach((pointer) => expect(elementIds.has(pointer.targetId)).toBe(true));
+        step.edges?.forEach((edge) => {
+          expect(elementIds.has(edge.from)).toBe(true);
+          expect(elementIds.has(edge.to)).toBe(true);
+        });
+      });
+    }
+  );
+
+  it.each(
+    algorithms
+      .filter(({ meta }) => meta.category === "Sorting" || meta.id === "merge-sort-42" || meta.id === "quick-sort-42")
+      .map((algorithm) => [algorithm.meta.id, algorithm] as const)
+  )("%s ends with a sorted array", (_, algorithm) => {
+    const lastStep = algorithm.generateSteps(algorithm.meta.defaultInput).at(-1)!;
+    const values = lastStep.elements.map((element) => Number(element.value));
+    expect(values).toEqual([...values].sort((a, b) => a - b));
+  });
+
+  it("uses teaching examples with multiple decisions", () => {
+    const binary = algorithms.find(({ meta }) => meta.id === "binary-search")!;
+    const twoPointers = algorithms.find(({ meta }) => meta.id === "two-pointers")!;
+    expect(binary.generateSteps(binary.meta.defaultInput).length).toBeGreaterThanOrEqual(5);
+    expect(twoPointers.generateSteps(twoPointers.meta.defaultInput).length).toBeGreaterThanOrEqual(6);
+  });
+
+  it("reserves path state for reconstructed paths", () => {
+    for (const id of ["bfs", "dfs"]) {
+      const algorithm = algorithms.find(({ meta }) => meta.id === id)!;
+      const finalStep = algorithm.generateSteps(algorithm.meta.defaultInput).at(-1)!;
+      expect(finalStep.elements.some(({ state }) => state === "path")).toBe(false);
+      expect(finalStep.edges?.some(({ state }) => state === "path")).toBe(false);
+    }
+  });
+
+  it("keeps identity stable for pointer-based visualizations", () => {
+    const linked = algorithms.find(({ meta }) => meta.id === "linked-list")!;
+    const linkedSteps = linked.generateSteps(linked.meta.defaultInput);
+    expect(linkedSteps[2].elements.some(({ id }) => id === "node-25")).toBe(true);
+    expect(linkedSteps[4].elements.some(({ id }) => id === "node-30")).toBe(false);
+
+    const stackQueue = algorithms.find(({ meta }) => meta.id === "stack-queue")!;
+    const queueSteps = stackQueue.generateSteps(stackQueue.meta.defaultInput)
+      .filter(({ layoutOverride }) => layoutOverride === "queue");
+    expect(queueSteps.length).toBeGreaterThan(0);
+    expect(queueSteps.some(({ elements }) => elements.some(({ id }) => id === "queue-X"))).toBe(true);
+
+    const memory = algorithms.find(({ meta }) => meta.id === "memory-blocks")!;
+    expect(memory.generateSteps(memory.meta.defaultInput)[0].elements[0].id).toBe("b0");
+  });
+
+  it("uses fill-specific grid semantics", () => {
+    const floodFill = algorithms.find(({ meta }) => meta.id === "flood-fill")!;
+    expect(floodFill.meta.gridVariant).toBe("fill");
+    expect(floodFill.meta.legend.some(({ tone }) => tone === "filled")).toBe(true);
+  });
+});

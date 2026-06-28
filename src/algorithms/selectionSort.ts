@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, sortedStates } from "./helpers";
+import { SELECTION_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -35,7 +36,7 @@ function generateSteps(input: number[]): Step[] {
       steps.push({
         id: stepId++,
         elements: makeElements(arr, { ...base, [minIdx]: "min", [j]: "comparing" }),
-        highlightedLines: [3, 4],
+        highlightedLines: [4, 5],
         explanation: `Checking arr[${j}]=${arr[j]} against current min ${arr[minIdx]}. ${
           arr[j] < arr[minIdx]
             ? `${arr[j]} is smaller! New minimum found.`
@@ -58,7 +59,7 @@ function generateSteps(input: number[]): Step[] {
       steps.push({
         id: stepId++,
         elements: makeElements(arr, { ...base, [i]: "swapping", [minIdx]: "swapping" }),
-        highlightedLines: [5],
+        highlightedLines: [7],
         explanation: `Minimum of unsorted portion is ${arr[minIdx]} at index ${minIdx}. Swapping with index ${i} (value ${arr[i]}).`,
         variables: { swapping: `arr[${i}]=${arr[i]} ↔ arr[${minIdx}]=${arr[minIdx]}` },
       });
@@ -71,7 +72,7 @@ function generateSteps(input: number[]): Step[] {
     steps.push({
       id: stepId++,
       elements: makeElements(arr, sortedStates(sorted)),
-      highlightedLines: [6],
+      highlightedLines: [8],
       explanation: `${arr[i]} is now in its final correct position. Sorted portion: [${[...sorted].map((k) => arr[k]).join(", ")}].`,
       variables: { pass: i + 1, swaps },
     });
@@ -79,10 +80,10 @@ function generateSteps(input: number[]): Step[] {
 
   sorted.add(n - 1);
   steps.push({
-    id: stepId++,
+    id: stepId,
     elements: makeElements(arr, Object.fromEntries(arr.map((_, i) => [i, "sorted" as ElementState]))),
-    highlightedLines: [7],
-    explanation: `✅ Done! [${arr.join(", ")}]. Selection sort always makes exactly n-1 swaps — useful when writes are expensive. Time complexity: O(n²).`,
+    highlightedLines: [9],
+    explanation: `✅ Done! [${arr.join(", ")}]. Selection sort makes at most n-1 meaningful swaps — useful when writes are expensive. Time complexity: O(n²).`,
     variables: { sorted: "complete", swaps },
   });
 
@@ -96,6 +97,7 @@ export const selectionSort: AlgorithmDefinition = {
     category: "Sorting",
     difficulty: "Beginner",
     layout: "array",
+    legend: SELECTION_LEGEND,
     timeComplexity: { best: "O(n²)", average: "O(n²)", worst: "O(n²)" },
     spaceComplexity: "O(1)",
     description:
