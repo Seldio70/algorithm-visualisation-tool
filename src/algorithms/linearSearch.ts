@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, finalStep } from "./helpers";
+import { SEARCH_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -39,7 +40,7 @@ function generateSteps(input: number[]): Step[] {
           makeElements(arr, { ...states, [i]: "path" }),
           `✅ Found ${target} at index ${i} after ${i + 1} comparisons.`,
           "Linear search is O(n) — simple but slow on large datasets. Use it when data is unsorted or small. Binary search needs sorted data but is much faster.",
-          5
+          3
         )
       );
       return steps;
@@ -52,7 +53,7 @@ function generateSteps(input: number[]): Step[] {
       makeElements(arr, Object.fromEntries(arr.map((_, i) => [i, "visited" as ElementState]))),
       `❌ ${target} not found after checking all ${arr.length} elements.`,
       "When search fails, linear search still costs O(n). Consider sorting first if you'll search repeatedly.",
-      6
+      5
     )
   );
 
@@ -66,6 +67,7 @@ export const linearSearch: AlgorithmDefinition = {
     category: "Searching",
     difficulty: "Beginner",
     layout: "linear",
+    legend: SEARCH_LEGEND,
     timeComplexity: { best: "O(1)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(1)",
     description: "Sequentially checks each element until the target is found or the array ends. Simple and works on unsorted data.",

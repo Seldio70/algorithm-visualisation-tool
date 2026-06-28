@@ -1,13 +1,14 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../../types";
 import { finalStep } from "../helpers";
+import { MEMORY_LEGEND } from "../../constants/legends";
 
 type Block = { id: string; label: string; value: string; state: ElementState };
 
 function makeHeap(blocks: Block[]) {
-  return blocks.map((b, i) => ({ id: `el-${i}`, value: b.value, state: b.state, label: b.label }));
+  return blocks.map((block) => ({ id: block.id, value: block.value, state: block.state, label: block.label }));
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
 
@@ -22,7 +23,7 @@ function generateSteps(_input: number[]): Step[] {
     id: stepId++,
     elements: makeHeap(blocks),
     highlightedLines: [1],
-    explanation: `Conceptual heap visualization: memory starts as one large free block. malloc() splits blocks; free() coalesces neighbors. Essential for understanding 42's malloc project.`,
+    explanation: `Conceptual 256B heap shown as four adjacent 64B free blocks. malloc() splits blocks; free() coalesces neighbors. Essential for understanding 42's malloc project.`,
     variables: { heapSize: "256B", freeBlocks: 4 },
   });
 
@@ -54,7 +55,7 @@ function generateSteps(_input: number[]): Step[] {
   steps.push({
     id: stepId++,
     elements: makeHeap(blocks),
-    highlightedLines: [5, 6],
+    highlightedLines: [2],
     explanation: `malloc(48): Next request needs 48B. First block (32B free) too small. Try next block (64B) — fits!`,
     variables: { request: "48B", skip: "0x0020 (too small)" },
   });
@@ -68,7 +69,7 @@ function generateSteps(_input: number[]): Step[] {
   steps.push({
     id: stepId++,
     elements: makeHeap(blocks),
-    highlightedLines: [7],
+    highlightedLines: [3, 4],
     explanation: `Second allocation at 0x0040. 16B remainder left free — fragmentation begins.`,
     variables: { allocated: "0x0040", fragmentation: "16B" },
   });
@@ -77,7 +78,7 @@ function generateSteps(_input: number[]): Step[] {
   steps.push({
     id: stepId++,
     elements: makeHeap(blocks),
-    highlightedLines: [8, 9],
+    highlightedLines: [6, 7, 8],
     explanation: `free(0x0000): Mark block FREE. Coalesce with adjacent free blocks if possible. 0x0000 (32B free) + 0x0020 (32B free) → merged 64B block.`,
     variables: { freed: "0x0000", coalesced: "yes" },
   });
@@ -94,7 +95,7 @@ function generateSteps(_input: number[]): Step[] {
       makeHeap(blocks),
       `✅ Heap state after alloc/free cycle. Watch for fragmentation and coalescing — key malloc design decisions.`,
       "The malloc project requires implementing this yourself. Understanding block splitting, free lists, and coalescing is non-negotiable at 42.",
-      10
+      9
     )
   );
 
@@ -108,6 +109,7 @@ export const memoryBlocks: AlgorithmDefinition = {
     category: "42 Tirana",
     difficulty: "Advanced",
     layout: "memory",
+    legend: MEMORY_LEGEND,
     timeComplexity: { best: "O(1)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(n)",
     description: "Visualizes heap allocation: malloc splits free blocks, free coalesces neighbors. Conceptual malloc internals.",

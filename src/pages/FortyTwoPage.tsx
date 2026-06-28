@@ -1,6 +1,8 @@
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { fortyTwoAlgorithms, fortyTwoMap } from "../algorithms";
 import { AlgorithmWorkspace } from "./LearnPage";
+import { NotFoundPage } from "./NotFoundPage";
+import { usePageMetadata } from "../hooks/usePageMetadata";
 
 export function FortyTwoPage() {
   const { algorithmId } = useParams<{ algorithmId?: string }>();
@@ -8,7 +10,7 @@ export function FortyTwoPage() {
   if (algorithmId) {
     const algo = fortyTwoMap[algorithmId];
     if (!algo) {
-      return <Navigate to="/42" replace />;
+      return <NotFoundPage message="That 42 Tirana exercise could not be found." />;
     }
     return (
       <AlgorithmWorkspace
@@ -21,6 +23,12 @@ export function FortyTwoPage() {
       />
     );
   }
+
+  return <FortyTwoHub />;
+}
+
+function FortyTwoHub() {
+  usePageMetadata("42 Tirana exercises · AlgoVisualisation", "violet");
 
   return (
     <div className="glass-canvas min-h-screen text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>

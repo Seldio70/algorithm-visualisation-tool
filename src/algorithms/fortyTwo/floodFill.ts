@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../../types";
 import { makeGridElements, finalStep } from "../helpers";
+import { FLOOD_FILL_LEGEND } from "../../constants/legends";
 
 const COLS = 6;
 const GRID = [
@@ -10,7 +11,7 @@ const GRID = [
   1, 1, 1, 1, 1, 1,
 ];
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const colors = [...GRID];
@@ -56,7 +57,7 @@ function generateSteps(_input: number[]): Step[] {
       steps.push({
         id: stepId++,
         elements: makeGridElements(colors, COLS, states),
-        highlightedLines: [2, 3, 4],
+        highlightedLines: [3, 4, 5, 6, 7],
         explanation: `Fill neighbor (${nr},${nc}). Check 4 directions: up, down, left, right. Skip walls (1) and already-filled cells.`,
         variables: { row: nr, col: nc, queueSize: queue.length },
         pointers: [{ name: "fill", targetId: `el-${nIdx}` }],
@@ -65,7 +66,7 @@ function generateSteps(_input: number[]): Step[] {
   }
 
   const finalStates = Object.fromEntries(
-    colors.map((c, i) => [i, c === newColor ? "path" as ElementState : c === 1 ? "default" as ElementState : "visited" as ElementState])
+    colors.map((c, i) => [i, c === newColor ? "default" as ElementState : c === 1 ? "default" as ElementState : "visited" as ElementState])
   );
 
   steps.push(
@@ -74,7 +75,7 @@ function generateSteps(_input: number[]): Step[] {
       makeGridElements(colors, COLS, finalStates),
       `✅ Flood fill complete. All connected 0-cells replaced with color ${newColor}.`,
       "Flood fill appears in FdF (wireframe rendering) and game map parsing. It's DFS/BFS on a 2D grid — same pattern as so_long map validation.",
-      5
+      9
     )
   );
 
@@ -88,6 +89,8 @@ export const floodFill: AlgorithmDefinition = {
     category: "42 Tirana",
     difficulty: "Intermediate",
     layout: "grid",
+    gridVariant: "fill",
+    legend: FLOOD_FILL_LEGEND,
     gridCols: 6,
     timeComplexity: { best: "O(n)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(n)",
@@ -95,7 +98,7 @@ export const floodFill: AlgorithmDefinition = {
     defaultInput: [0],
     accent: "violet",
     fortyTwoNote: "FdF rendering, so_long map flood-fill validation.",
-    code: `function floodFill(grid, r, c, oldColor, newColor) {\n  if (grid[r][c] !== oldColor) return;\n  grid[r][c] = newColor;\n  floodFill(grid, r+1, c, oldColor, newColor);\n  floodFill(grid, r-1, c, oldColor, newColor);\n  floodFill(grid, r, c+1, oldColor, newColor);\n  floodFill(grid, r, c-1, oldColor, newColor);\n}`,
+    code: `function floodFill(grid, start, oldColor, newColor) {\n  const queue = [start], visited = new Set([start]);\n  while (queue.length) {\n    const cell = queue.shift();\n    grid[cell.row][cell.col] = newColor;\n    for (const neighbor of getFourNeighbors(cell))\n      if (matches(neighbor, oldColor, visited)) queue.push(neighbor);\n  }\n}`,
   },
   generateSteps,
 };

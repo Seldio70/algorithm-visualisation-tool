@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEmailCapture } from "../hooks/useEmailCapture";
 import { Toast } from "../components/Toast";
+import { usePageMetadata } from "../hooks/usePageMetadata";
 
 export function LandingPage() {
+  usePageMetadata("AlgoVisualisation · Learn algorithms visually");
   const [email, setEmail] = useState("");
   const { capture, toast, dismissToast } = useEmailCapture();
 
@@ -54,7 +56,7 @@ export function LandingPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-lg text-slate-400 max-w-2xl mx-auto mb-10"
         >
-          Step through 15 algorithms visually, line by line, with plain English explanations.
+          Step through 21 visualizations: 14 core algorithms and 7 exercises built for 42 students.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -119,9 +121,12 @@ export function LandingPage() {
         </motion.div>
 
         <div className="text-center mb-16">
-          <h2 className="text-xl font-semibold mb-4">Get notified when we add new algorithms</h2>
+          <h2 className="text-xl font-semibold mb-2">Save your email for a future signup</h2>
+          <p className="mb-4 text-sm text-slate-500">Stored only in this browser. Nothing is submitted or sent anywhere.</p>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+            <label htmlFor="local-email" className="sr-only">Email to save on this device</label>
             <input
+              id="local-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -132,7 +137,7 @@ export function LandingPage() {
               type="submit"
               className="glass-control rounded-2xl px-6 py-2.5 font-medium transition-colors duration-300"
             >
-              Notify me
+              Save locally
             </button>
           </form>
         </div>
@@ -152,7 +157,7 @@ export function LandingPage() {
       </section>
 
       <footer className="glass-header border-t px-6 py-8 text-center text-sm text-slate-500">
-        <p>AlgoVisualisation — Learn algorithms visually. Open source, client-side, no account required.</p>
+        <p>AlgoVisualisation — Learn algorithms visually. Private project, client-side, no account required.</p>
       </footer>
 
       <Toast message={toast} onDismiss={dismissToast} />

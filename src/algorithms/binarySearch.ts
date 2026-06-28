@@ -1,10 +1,11 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements } from "./helpers";
+import { SEARCH_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   const arr = [...input].sort((a, b) => a - b);
-  const target = arr[Math.floor(arr.length / 2) - 1];
+  const target = arr[Math.max(0, arr.length - 3)];
   let stepId = 0;
 
   steps.push({
@@ -30,7 +31,7 @@ function generateSteps(input: number[]): Step[] {
     steps.push({
       id: stepId++,
       elements: makeElements(arr, states),
-      highlightedLines: [2, 3],
+      highlightedLines: [3, 4],
       explanation: `Search range: [${left}...${right}]. Mid = ${mid}, arr[mid] = ${arr[mid]}. Is ${arr[mid]} equal to ${target}?`,
       variables: { target, left, right, mid, "arr[mid]": arr[mid] },
       pointers: [
@@ -46,9 +47,9 @@ function generateSteps(input: number[]): Step[] {
         fs[i] = i === mid ? "path" : i < left || i > right ? "visited" : "default";
       }
       steps.push({
-        id: stepId++,
+        id: stepId,
         elements: makeElements(arr, fs),
-        highlightedLines: [4],
+        highlightedLines: [5],
         explanation: `✅ Found ${target} at index ${mid}! Binary search only needed ${steps.length} steps for an array of ${arr.length} elements. Linear search could've taken up to ${arr.length}.`,
         variables: { target, foundAt: mid },
       });
@@ -57,7 +58,7 @@ function generateSteps(input: number[]): Step[] {
       steps.push({
         id: stepId++,
         elements: makeElements(arr, states),
-        highlightedLines: [5],
+        highlightedLines: [6],
         explanation: `${arr[mid]} < ${target} → target is in the RIGHT half. Move left to ${mid + 1}. Left half eliminated.`,
         variables: { target, left: mid + 1, right },
       });
@@ -66,7 +67,7 @@ function generateSteps(input: number[]): Step[] {
       steps.push({
         id: stepId++,
         elements: makeElements(arr, states),
-        highlightedLines: [6],
+        highlightedLines: [7],
         explanation: `${arr[mid]} > ${target} → target is in the LEFT half. Move right to ${mid - 1}. Right half eliminated.`,
         variables: { target, left, right: mid - 1 },
       });
@@ -84,6 +85,7 @@ export const binarySearch: AlgorithmDefinition = {
     category: "Searching",
     difficulty: "Beginner",
     layout: "linear",
+    legend: SEARCH_LEGEND,
     timeComplexity: { best: "O(1)", average: "O(log n)", worst: "O(log n)" },
     spaceComplexity: "O(1)",
     description:

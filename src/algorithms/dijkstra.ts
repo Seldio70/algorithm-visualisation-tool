@@ -1,6 +1,7 @@
 import type { AlgorithmDefinition, Step, ElementState, GraphEdge, VisualElement } from "../types";
 import { finalStep } from "./helpers";
 import { DIJKSTRA_EDGES, DIJKSTRA_GRAPH_LAYOUT, edgeId } from "./graphConfig";
+import { DIJKSTRA_LEGEND } from "../constants/legends";
 
 const LABELS = ["A", "B", "C", "D", "E"];
 const SOURCE = 0;
@@ -65,7 +66,7 @@ function pathEdgesFromNodes(path: number[]): Set<string> {
   return keys;
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const dist = LABELS.map(() => Infinity);
@@ -173,12 +174,13 @@ export const dijkstra: AlgorithmDefinition = {
     category: "Graph",
     difficulty: "Advanced",
     layout: "graph",
+    legend: DIJKSTRA_LEGEND,
     graphLayout: DIJKSTRA_GRAPH_LAYOUT,
     timeComplexity: { best: "O(E log V)", average: "O(E log V)", worst: "O(V²)" },
     spaceComplexity: "O(V)",
     description: "Finds shortest paths from a source node to all other nodes in a weighted graph with non-negative edges.",
     defaultInput: [0],
-    code: `function dijkstra(graph, source) {\n  const dist = {};\n  const parent = {};\n  dist[source] = 0;\n  while (unvisited.size) {\n    const u = minDist(unvisited, dist);\n    for (const [v, w] of graph[u]) {\n      if (dist[u] + w < dist[v]) {\n        dist[v] = dist[u] + w;\n        parent[v] = u;\n      }\n    }\n  }\n}`,
+    code: `function dijkstra(graph, source) {\n  initialize(dist, parent, source);\n  while (unvisited.size) {\n    const u = minDist(unvisited, dist);\n    for (const [v, weight] of graph[u])\n      if (dist[u] + weight < dist[v]) update(dist, parent, u, v);\n  } // reconstruct the requested shortest path\n  return { dist, parent };\n}`,
   },
   generateSteps,
 };

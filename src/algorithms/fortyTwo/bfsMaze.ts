@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../../types";
 import { makeGridElements, finalStep } from "../helpers";
+import { MAZE_LEGEND } from "../../constants/legends";
 
 const COLS = 7;
 // 0=path, 1=wall, 2=start, 3=goal
@@ -12,7 +13,7 @@ const MAZE = [
   1, 1, 1, 1, 1, 1, 1,
 ];
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const grid = [...MAZE];
@@ -28,10 +29,6 @@ function generateSteps(_input: number[]): Step[] {
     highlightedLines: [1, 2],
     explanation: `BFS on a maze grid finds the shortest path from start (S) to goal (G). Explore level by level — guarantees shortest path in unweighted grids.`,
     variables: { start, goal },
-    pointers: [
-      { name: "S", targetId: `el-${start}` },
-      { name: "G", targetId: `el-${goal}` },
-    ],
   });
 
   visited.add(start);
@@ -54,7 +51,7 @@ function generateSteps(_input: number[]): Step[] {
           [goal]: "highlight",
         }
       ),
-      highlightedLines: [3, 4],
+      highlightedLines: [4, 5],
       explanation: `Dequeue cell (${row},${col}). Check all 4 neighbors for paths (0) or goal.`,
       variables: { row, col, queueSize: queue.length },
     });
@@ -81,7 +78,7 @@ function generateSteps(_input: number[]): Step[] {
             [goal]: "highlight",
           }
         ),
-        highlightedLines: [5, 6],
+        highlightedLines: [7, 8],
         explanation: `Discover (${nr},${nc}). Enqueue for later. ${nIdx === goal ? "Reached the goal!" : "Keep exploring."}`,
         variables: { discovered: `(${nr},${nc})` },
       });
@@ -108,7 +105,7 @@ function generateSteps(_input: number[]): Step[] {
       ),
       `✅ Shortest path found via BFS! Green cells show the optimal route through the maze.`,
       "so_long and cub3d use this exact pattern for map validation and pathfinding. BFS on grids is one of the most practical algorithms at 42.",
-      7
+      6
     )
   );
 
@@ -122,6 +119,8 @@ export const bfsMaze: AlgorithmDefinition = {
     category: "42 Tirana",
     difficulty: "Intermediate",
     layout: "grid",
+    gridVariant: "maze",
+    legend: MAZE_LEGEND,
     gridCols: 7,
     timeComplexity: { best: "O(n)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(n)",

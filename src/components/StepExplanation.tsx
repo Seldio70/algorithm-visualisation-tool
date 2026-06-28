@@ -5,9 +5,10 @@ import { ACCENT } from "../constants/theme";
 interface StepExplanationProps {
   explanation: string;
   accent?: ThemeAccent;
+  isPlaying?: boolean;
 }
 
-export function StepExplanation({ explanation, accent = "cyan" }: StepExplanationProps) {
+export function StepExplanation({ explanation, accent = "cyan", isPlaying = false }: StepExplanationProps) {
   const a = ACCENT[accent];
   return (
     <div className={`glass-subtle themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} border-b px-4 py-2 lg:h-[4.5rem] lg:shrink-0 lg:overflow-y-auto`}>
@@ -17,6 +18,8 @@ export function StepExplanation({ explanation, accent = "cyan" }: StepExplanatio
         </div>
         <motion.p
           key={explanation}
+          aria-live={isPlaying ? "off" : "polite"}
+          aria-atomic="true"
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}

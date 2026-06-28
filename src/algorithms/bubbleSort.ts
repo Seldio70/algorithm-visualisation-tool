@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, sortedStates } from "./helpers";
+import { BUBBLE_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -77,16 +78,16 @@ function generateSteps(input: number[]): Step[] {
     steps.push({
       id: stepId++,
       elements: makeElements(arr, sortedStates(sorted)),
-      highlightedLines: [6],
+      highlightedLines: [7],
       explanation: `Pass ${pass + 1} complete. ${arr[n - 1 - pass]} is now in its correct final position ✓`,
       variables: { pass: pass + 1, comparisons, swaps },
     });
   }
 
   steps.push({
-    id: stepId++,
+    id: stepId,
     elements: makeElements(arr, Object.fromEntries(arr.map((_, i) => [i, "sorted" as ElementState]))),
-    highlightedLines: [7],
+    highlightedLines: [8],
     explanation: `✅ Sorted! [${arr.join(", ")}]. Total comparisons: ${comparisons}, swaps: ${swaps}. Time complexity: O(n²).`,
     variables: { sorted: "complete", comparisons, swaps },
   });
@@ -101,6 +102,7 @@ export const bubbleSort: AlgorithmDefinition = {
     category: "Sorting",
     difficulty: "Beginner",
     layout: "array",
+    legend: BUBBLE_LEGEND,
     timeComplexity: { best: "O(n)", average: "O(n²)", worst: "O(n²)" },
     spaceComplexity: "O(1)",
     description:

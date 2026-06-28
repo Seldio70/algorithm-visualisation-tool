@@ -108,8 +108,9 @@ export function AlgorithmSidebar({
 
   return (
     <aside
+      id="algorithm-sidebar"
       aria-label="Algorithm exercises"
-      className={`glass-sidebar themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} w-full max-h-[40dvh] overflow-y-auto border-b sm:max-h-none sm:w-64 sm:shrink-0 sm:border-r sm:border-b-0`}
+      className={`glass-sidebar themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} h-full w-full overflow-y-auto rounded-2xl border sm:rounded-none sm:border-y-0 sm:border-l-0`}
     >
       <div className="glass-header sticky top-0 z-10 border-b p-3">
         <div className="mb-2.5 flex items-center justify-between px-0.5">

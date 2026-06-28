@@ -1,5 +1,6 @@
 import type { ThemeAccent } from "../types";
 import { ACCENT } from "../constants/theme";
+import { PLAYBACK_SPEEDS } from "../constants/playback";
 
 interface ControlsProps {
   isPlaying: boolean;
@@ -10,6 +11,7 @@ interface ControlsProps {
   onPrev: () => void;
   onTogglePlay: () => void;
   onNext: () => void;
+  onSeek: (stepIndex: number) => void;
   onSpeedChange: (speed: number) => void;
   accent?: ThemeAccent;
   compact?: boolean;
@@ -24,6 +26,7 @@ export function Controls({
   onPrev,
   onTogglePlay,
   onNext,
+  onSeek,
   onSpeedChange,
   accent = "cyan",
   compact = false,
@@ -31,20 +34,49 @@ export function Controls({
   const a = ACCENT[accent];
   const atEnd = currentStep === totalSteps - 1;
   const playGlow = accent === "violet" ? "shadow-violet-500/25" : "shadow-cyan-500/25";
+  const speedIndex = Math.max(0, PLAYBACK_SPEEDS.findIndex(({ delay }) => delay === speed));
+  const speedOption = PLAYBACK_SPEEDS[speedIndex];
+  const progressStyle = {
+    background: `linear-gradient(to right, ${
+      accent === "violet" ? "#8b5cf6" : "#06b6d4"
+    } 0%, ${accent === "violet" ? "#8b5cf6" : "#06b6d4"} ${
+      totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 0
+    }%, rgb(30 41 59) ${
+      totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 0
+    }%, rgb(30 41 59) 100%)`,
+  };
 
   if (compact) {
     return (
-      <div className="px-3 py-2 flex items-center gap-2">
-        <div className="glass-field hidden h-1 max-w-[8rem] min-w-0 flex-1 overflow-hidden rounded-full sm:block">
-          <div
-            className={`h-full ${a.progress} rounded-full transition-all duration-200`}
-            style={{ width: `${totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 0}%` }}
-          />
-        </div>
+      <div className="px-3 py-2">
+        <input
+          type="range"
+          min={0}
+          max={Math.max(0, totalSteps - 1)}
+          value={currentStep}
+          onChange={(event) => onSeek(Number(event.target.value))}
+          aria-label="Animation step"
+          aria-valuetext={`Step ${currentStep + 1} of ${totalSteps}`}
+          className={`timeline-slider mb-2 w-full sm:hidden ${a.slider}`}
+          style={progressStyle}
+        />
+        <div className="flex items-center gap-2">
+          <input
+          type="range"
+          min={0}
+          max={Math.max(0, totalSteps - 1)}
+          value={currentStep}
+          onChange={(event) => onSeek(Number(event.target.value))}
+          aria-label="Animation step"
+          aria-valuetext={`Step ${currentStep + 1} of ${totalSteps}`}
+          className={`timeline-slider hidden max-w-[8rem] min-w-0 flex-1 sm:block ${a.slider}`}
+          style={progressStyle}
+        />
         <button
           onClick={onReset}
-          className="glass-control rounded-lg p-1.5 text-slate-300 transition-colors"
+          className="glass-control flex h-11 w-11 items-center justify-center rounded-xl text-slate-300 transition-colors sm:h-8 sm:w-8"
           title="Reset (R)"
+          aria-label="Reset animation"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 2v6h6" />
@@ -54,8 +86,9 @@ export function Controls({
         <button
           onClick={onPrev}
           disabled={currentStep === 0}
-          className="glass-control rounded-lg p-1.5 text-slate-300 transition-colors disabled:opacity-30"
+          className="glass-control flex h-11 w-11 items-center justify-center rounded-xl text-slate-300 transition-colors disabled:opacity-30 sm:h-8 sm:w-8"
           title="Previous (←)"
+          aria-label="Previous step"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="19 20 9 12 19 4 19 20" />
@@ -64,8 +97,9 @@ export function Controls({
         </button>
         <button
           onClick={onTogglePlay}
-          className={`flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-semibold text-slate-950 shadow-lg transition-all hover:-translate-y-px ${a.primary} ${playGlow}`}
+          className={`flex h-11 items-center gap-1.5 rounded-xl px-4 text-xs font-semibold text-slate-950 shadow-lg transition-all hover:-translate-y-px sm:h-8 ${a.primary} ${playGlow}`}
           title="Play/Pause (Space)"
+          aria-label={isPlaying ? "Pause animation" : atEnd ? "Replay animation" : "Play animation"}
         >
           {isPlaying ? (
             <>
@@ -87,8 +121,9 @@ export function Controls({
         <button
           onClick={onNext}
           disabled={atEnd}
-          className="glass-control rounded-lg p-1.5 text-slate-300 transition-colors disabled:opacity-30"
+          className="glass-control flex h-11 w-11 items-center justify-center rounded-xl text-slate-300 transition-colors disabled:opacity-30 sm:h-8 sm:w-8"
           title="Next (→)"
+          aria-label="Next step"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="5 4 15 12 5 20 5 4" />
@@ -97,17 +132,20 @@ export function Controls({
         </button>
         <input
           type="range"
-          min={100}
-          max={1500}
-          step={100}
-          value={1600 - speed}
-          onChange={(e) => onSpeedChange(1600 - Number(e.target.value))}
+          min={0}
+          max={PLAYBACK_SPEEDS.length - 1}
+          step={1}
+          value={speedIndex}
+          onChange={(event) => onSpeedChange(PLAYBACK_SPEEDS[Number(event.target.value)].delay)}
           className={`w-14 ${a.slider}`}
-          title="Speed"
+          title={`Speed: ${speedOption.description}`}
+          aria-label="Playback speed"
+          aria-valuetext={`${speedOption.description}, ${speedOption.label} per step`}
         />
-        <span className="text-[10px] text-slate-500 font-mono ml-auto hidden sm:inline">
-          {currentStep + 1}/{totalSteps}
-        </span>
+          <span className="text-[10px] text-slate-500 font-mono ml-auto hidden sm:inline">
+            {currentStep + 1}/{totalSteps}
+          </span>
+        </div>
       </div>
     );
   }
@@ -115,18 +153,24 @@ export function Controls({
   return (
     <>
       <div className="px-4 pt-3 pb-1">
-        <div className="glass-field h-1 w-full overflow-hidden rounded-full">
-          <div
-            className={`h-full ${a.progress} rounded-full transition-all duration-200`}
-            style={{ width: `${totalSteps > 1 ? (currentStep / (totalSteps - 1)) * 100 : 0}%` }}
-          />
-        </div>
+        <input
+          type="range"
+          min={0}
+          max={Math.max(0, totalSteps - 1)}
+          value={currentStep}
+          onChange={(event) => onSeek(Number(event.target.value))}
+          aria-label="Animation step"
+          aria-valuetext={`Step ${currentStep + 1} of ${totalSteps}`}
+          className={`timeline-slider w-full ${a.slider}`}
+          style={progressStyle}
+        />
       </div>
       <div className="px-4 pb-4 pt-2 flex items-center gap-2 sm:gap-3 flex-wrap">
         <button
           onClick={onReset}
           className="glass-control rounded-xl p-2 text-slate-300 transition-colors duration-300"
           title="Reset (R)"
+          aria-label="Reset animation"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 2v6h6" />
@@ -138,6 +182,7 @@ export function Controls({
           disabled={currentStep === 0}
           className="glass-control rounded-xl p-2 text-slate-300 transition-colors duration-300 disabled:opacity-30"
           title="Previous (←)"
+          aria-label="Previous step"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="19 20 9 12 19 4 19 20" />
@@ -148,6 +193,7 @@ export function Controls({
           onClick={onTogglePlay}
           className={`flex min-w-[8rem] flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold text-slate-950 shadow-lg transition-all duration-300 hover:-translate-y-px ${a.primary} ${playGlow}`}
           title="Play/Pause (Space)"
+          aria-label={isPlaying ? "Pause animation" : atEnd ? "Replay animation" : "Play animation"}
         >
           {isPlaying ? (
             <>
@@ -171,6 +217,7 @@ export function Controls({
           disabled={atEnd}
           className="glass-control rounded-xl p-2 text-slate-300 transition-colors duration-300 disabled:opacity-30"
           title="Next (→)"
+          aria-label="Next step"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="5 4 15 12 5 20 5 4" />
@@ -183,13 +230,16 @@ export function Controls({
           </svg>
           <input
             type="range"
-            min={100}
-            max={1500}
-            step={100}
-            value={1600 - speed}
-            onChange={(e) => onSpeedChange(1600 - Number(e.target.value))}
+            min={0}
+            max={PLAYBACK_SPEEDS.length - 1}
+            step={1}
+            value={speedIndex}
+            onChange={(event) => onSpeedChange(PLAYBACK_SPEEDS[Number(event.target.value)].delay)}
             className={`w-16 ${a.slider}`}
+            aria-label="Playback speed"
+            aria-valuetext={`${speedOption.description}, ${speedOption.label} per step`}
           />
+          <span className="min-w-8 font-mono text-[10px] text-slate-400">{speedOption.label}</span>
         </div>
       </div>
     </>

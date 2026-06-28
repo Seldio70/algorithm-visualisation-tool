@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../types";
 import { finalStep } from "./helpers";
+import { TREE_LEGEND } from "../constants/legends";
 
 interface BstNode {
   id: string;
@@ -61,7 +62,7 @@ function generateSteps(input: number[]): Step[] {
       steps.push({
         id: stepId++,
         elements: toElements(nodes, { ...pathStates, [cur.id]: "comparing" }),
-        highlightedLines: [3, 4],
+        highlightedLines: [3, 5],
         explanation: `Insert ${val}: compare with node ${cur.value}. ${val < cur.value ? `${val} < ${cur.value} → go LEFT.` : `${val} > ${cur.value} → go RIGHT.`}`,
         variables: { inserting: val, current: cur.value, compare: val < cur.value ? "<" : ">" },
         pointers: [{ name: "curr", targetId: cur.id }],
@@ -75,7 +76,7 @@ function generateSteps(input: number[]): Step[] {
           steps.push({
             id: stepId++,
             elements: toElements(nodes, { [cur.id]: "visited", [id]: "inserting" }),
-            highlightedLines: [5],
+            highlightedLines: [4],
             explanation: `Insert ${val} as left child of ${cur.value}.`,
             variables: { inserted: val, parent: cur.value, side: "left" },
           });
@@ -123,11 +124,12 @@ export const bstInsert: AlgorithmDefinition = {
     category: "Tree",
     difficulty: "Intermediate",
     layout: "tree",
+    legend: TREE_LEGEND,
     timeComplexity: { best: "O(log n)", average: "O(log n)", worst: "O(n)" },
     spaceComplexity: "O(h)",
     description: "Inserts a value into a Binary Search Tree while maintaining the BST property.",
     defaultInput: [8, 3, 10, 1, 6],
-    code: `function insert(root, val) {\n  if (!root) return new Node(val);\n  if (val < root.val) root.left = insert(root.left, val);\n  else root.right = insert(root.right, val);\n  return root;\n}`,
+    code: `function insert(root, val) {\n  if (!root) return new Node(val);\n  if (val < root.val)\n    root.left = insert(root.left, val);\n  else\n    root.right = insert(root.right, val);\n  return root;\n}`,
   },
   generateSteps,
 };

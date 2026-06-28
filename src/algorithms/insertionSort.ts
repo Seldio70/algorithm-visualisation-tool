@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { makeElements, sortedStates, finalStep } from "./helpers";
+import { INSERTION_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
@@ -37,7 +38,7 @@ function generateSteps(input: number[]): Step[] {
           [j]: "comparing",
           [j + 1]: "inserting",
         }),
-        highlightedLines: [4, 5],
+        highlightedLines: [5, 6],
         explanation: `arr[${j}]=${arr[j]} > key=${key}. Shift ${arr[j]} one position to the right.`,
         variables: { key, j, "arr[j]": arr[j] },
         pointers: [
@@ -55,7 +56,7 @@ function generateSteps(input: number[]): Step[] {
     steps.push({
       id: stepId++,
       elements: makeElements(arr, sortedStates(new Set([...sorted, ...Array.from({ length: i + 1 }, (_, k) => k)]))),
-      highlightedLines: [6],
+      highlightedLines: [9],
       explanation: `Insert ${key} at index ${j + 1}. Sorted portion is now [${arr.slice(0, i + 1).join(", ")}].`,
       variables: { i, insertedAt: j + 1 },
     });
@@ -67,7 +68,7 @@ function generateSteps(input: number[]): Step[] {
       makeElements(arr, Object.fromEntries(arr.map((_, i) => [i, "sorted" as ElementState]))),
       `✅ Sorted! [${arr.join(", ")}]. Insertion sort is O(n²) worst case but O(n) on nearly sorted data.`,
       "Insertion sort shines when data is mostly sorted — it's stable, in-place, and intuitive. It's the algorithm behind TimSort's small-array optimization.",
-      7
+      11
     )
   );
 
@@ -81,6 +82,7 @@ export const insertionSort: AlgorithmDefinition = {
     category: "Sorting",
     difficulty: "Beginner",
     layout: "array",
+    legend: INSERTION_LEGEND,
     timeComplexity: { best: "O(n)", average: "O(n²)", worst: "O(n²)" },
     spaceComplexity: "O(1)",
     description: "Builds the sorted array one element at a time by inserting each element into its correct position.",

@@ -39,6 +39,7 @@ export interface GraphLayout {
 export interface Step {
   id: number;
   elements: VisualElement[];
+  layoutOverride?: VisualizerLayout;
   pointers?: Pointer[];
   highlightedLines: number[];
   explanation: string;
@@ -55,7 +56,23 @@ export type VisualizerLayout =
   | "grid"
   | "linked-list"
   | "stack"
+  | "queue"
   | "memory";
+
+export type GridVariant = "maze" | "fill";
+
+export type LegendTone =
+  | ElementState
+  | "wall"
+  | "floor"
+  | "start"
+  | "goal"
+  | "filled";
+
+export interface LegendItem {
+  tone: LegendTone;
+  label: string;
+}
 
 export type AlgorithmCategory =
   | "Sorting"
@@ -82,6 +99,8 @@ export interface AlgorithmMeta {
   fortyTwoNote?: string;
   accent?: ThemeAccent;
   graphLayout?: GraphLayout;
+  gridVariant?: GridVariant;
+  legend: LegendItem[];
 }
 
 export interface AlgorithmDefinition {

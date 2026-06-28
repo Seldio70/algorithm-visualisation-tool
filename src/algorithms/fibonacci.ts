@@ -1,7 +1,8 @@
 import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { finalStep } from "./helpers";
+import { STACK_QUEUE_LEGEND } from "../constants/legends";
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const n = 5;
@@ -38,7 +39,7 @@ function generateSteps(_input: number[]): Step[] {
           value: s,
           state: i === stack.length - 1 ? "sorted" : "visited",
         })),
-        highlightedLines: [3],
+        highlightedLines: [2],
         explanation: `Base case fib(${k}) = ${k}. Return ${k} and unwind the stack.`,
         variables: { result: k },
         callStack: stack,
@@ -60,7 +61,7 @@ function generateSteps(_input: number[]): Step[] {
         })),
         { id: "el-r", value: `${left}+${right}=${result}`, state: "highlight" as ElementState },
       ],
-      highlightedLines: [4, 5],
+      highlightedLines: [3],
       explanation: `fib(${k}) = fib(${k - 1}) + fib(${k - 2}) = ${left} + ${right} = ${result}.`,
       variables: { fib_k: result },
       callStack: stack,
@@ -75,7 +76,7 @@ function generateSteps(_input: number[]): Step[] {
   steps.push({
     id: stepId++,
     elements: [{ id: "el-0", value: result, state: "sorted", label: `fib(${n})` }],
-    highlightedLines: [6],
+    highlightedLines: [6, 7, 8, 9],
     explanation: `Iterative approach uses O(1) space: loop from 2 to n, tracking prev two values. Same result, no stack explosion.`,
     variables: { iterative: result },
     callStack: [],
@@ -87,7 +88,7 @@ function generateSteps(_input: number[]): Step[] {
       [{ id: "el-0", value: result, state: "sorted" }],
       `✅ fib(${n}) = ${result}. Recursive version made ~${2 ** n} redundant calls — memoization or iteration fixes this.`,
       "Fibonacci illustrates recursion vs iteration tradeoffs. Memoization (dynamic programming) turns O(2^n) into O(n). Essential for understanding call stacks and DP.",
-      7
+      10
     )
   );
 
@@ -101,6 +102,7 @@ export const fibonacci: AlgorithmDefinition = {
     category: "Classic",
     difficulty: "Beginner",
     layout: "stack",
+    legend: STACK_QUEUE_LEGEND,
     timeComplexity: { best: "O(n)", average: "O(2^n)", worst: "O(2^n)" },
     spaceComplexity: "O(n)",
     description: "Computes Fibonacci numbers recursively vs iteratively, visualizing the call stack and redundant work.",

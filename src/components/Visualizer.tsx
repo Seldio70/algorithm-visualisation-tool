@@ -1,2 +1,2 @@
-export { Visualizer, GRID_LEGEND } from "./visualizers";
+export { Visualizer } from "./visualizers";
 export type { VisualizerProps } from "./visualizers";

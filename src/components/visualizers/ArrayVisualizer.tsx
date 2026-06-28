@@ -204,6 +204,38 @@ export function StackVisualizer({
   );
 }
 
+export function QueueVisualizer({ elements }: { elements: VisualElement[] }) {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 px-4">
+      <AnimatePresence mode="popLayout">
+        {elements.map((element, index) => (
+          <motion.div
+            key={element.id}
+            layout
+            initial={{ opacity: 0, x: 18, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, ...emphasisMotion(element.state) }}
+            exit={{ opacity: 0, x: -24, scale: 0.86 }}
+            transition={SOFT_SPRING}
+            className={`relative flex h-14 min-w-16 items-center justify-center rounded-xl border-2 px-3 font-mono text-sm font-bold transition-colors duration-300 ${STATE_STYLES[element.state]}`}
+          >
+            {index === 0 && (
+              <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-slate-400">
+                front
+              </span>
+            )}
+            {index === elements.length - 1 && (
+              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-slate-400">
+                back
+              </span>
+            )}
+            {element.value}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function MemoryVisualizer({ elements }: { elements: VisualElement[] }) {
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-2">
