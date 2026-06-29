@@ -66,6 +66,23 @@ function pathEdgesFromNodes(path: number[]): Set<string> {
   return keys;
 }
 
+function routeStates(
+  visited: Set<number>,
+  route: number[],
+  current: number,
+  highlighted?: number
+): Record<number, ElementState> {
+  const states: Record<number, ElementState> = Object.fromEntries(
+    [...visited].map((node) => [node, "visited" as ElementState])
+  );
+  route.forEach((node) => {
+    states[node] = "path";
+  });
+  states[current] = "current";
+  if (highlighted !== undefined) states[highlighted] = "highlight";
+  return states;
+}
+
 function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
@@ -96,18 +113,17 @@ function generateSteps(): Step[] {
     if (u === -1) break;
     visited.add(u);
 
-    const pickStates: Record<number, ElementState> = {
-      ...Object.fromEntries([...visited].map((v) => [v, "visited" as ElementState])),
-      [u]: "current",
-    };
+    const currentRoute = reconstructPath(parent, u);
+    const pickStates = routeStates(visited, currentRoute, u);
+    const currentRouteLabels = currentRoute.map((node) => LABELS[node]).join(" → ");
 
     steps.push({
       id: stepId++,
       elements: makeNodes(pickStates, dist),
-      edges: buildEdges(pickStates),
+      edges: buildEdges(pickStates, undefined, pathEdgesFromNodes(currentRoute)),
       highlightedLines: [3, 4],
-      explanation: `Pick unvisited node ${LABELS[u]} with smallest distance (${dist[u]}). Relax its outgoing edges.`,
-      variables: { current: LABELS[u], distance: dist[u] },
+      explanation: `Pick unvisited node ${LABELS[u]} with smallest distance (${dist[u]}). The green route shows the best path currently known to it.`,
+      variables: { current: LABELS[u], distance: dist[u], route: currentRouteLabels },
       pointers: [{ name: LABELS[u], targetId: `el-${u}` }],
     });
 
@@ -118,13 +134,21 @@ function generateSteps(): Step[] {
       if (alt < dist[v]) {
         dist[v] = alt;
         parent[v] = u;
+        const tentativeRoute = reconstructPath(parent, v);
+        const tentativeRouteLabels = tentativeRoute.map((node) => LABELS[node]).join(" → ");
+        const relaxStates = routeStates(visited, tentativeRoute, u, v);
         steps.push({
           id: stepId++,
-          elements: makeNodes({ ...pickStates, [v]: "highlight" }, dist),
-          edges: buildEdges({ ...pickStates, [v]: "highlight" }, [u, v]),
+          elements: makeNodes(relaxStates, dist),
+          edges: buildEdges(relaxStates, undefined, pathEdgesFromNodes(tentativeRoute)),
           highlightedLines: [5, 6],
-          explanation: `Relax edge ${LABELS[u]}→${LABELS[v]} (weight ${w}). New best distance to ${LABELS[v]}: ${alt}.`,
-          variables: { edge: `${LABELS[u]}→${LABELS[v]}`, weight: w, newDist: alt },
+          explanation: `Relax edge ${LABELS[u]}→${LABELS[v]} (weight ${w}). The green route is now the best known path to ${LABELS[v]}, with distance ${alt}.`,
+          variables: {
+            edge: `${LABELS[u]}→${LABELS[v]}`,
+            weight: w,
+            newDist: alt,
+            route: tentativeRouteLabels,
+          },
         });
       }
     }

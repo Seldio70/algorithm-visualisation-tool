@@ -66,4 +66,15 @@ describe("algorithm contracts", () => {
     // Once a word is emitted, its id (w-0) persists to the final step.
     expect(splitSteps.at(-1)!.elements.some(({ id }) => id === "w-0")).toBe(true);
   });
+
+  it("shows Dijkstra's best-known routes before the final result", () => {
+    const dijkstra = algorithms.find(({ meta }) => meta.id === "dijkstra")!;
+    const steps = dijkstra.generateSteps(dijkstra.meta.defaultInput);
+    const progressiveRouteSteps = steps
+      .slice(0, -2)
+      .filter((step) => step.edges?.some(({ state }) => state === "path"));
+
+    expect(progressiveRouteSteps.length).toBeGreaterThan(2);
+    expect(progressiveRouteSteps.every((step) => step.variables?.route)).toBe(true);
+  });
 });
