@@ -57,6 +57,13 @@ export function ArrayVisualizer({
 }: ArrayVisualizerProps) {
   const maxVal = Math.max(...elements.map((e) => Number(e.value)), 1);
   const isBarChart = layout === "array";
+  const valueOccurrences = new Map<string, number>();
+  const visualKeys = elements.map((element) => {
+    const valueKey = `${typeof element.value}:${String(element.value)}`;
+    const occurrence = valueOccurrences.get(valueKey) ?? 0;
+    valueOccurrences.set(valueKey, occurrence + 1);
+    return `${valueKey}:${occurrence}`;
+  });
   const visualizerHeight = isBarChart
     ? compact
       ? "h-full max-h-28"
@@ -67,15 +74,15 @@ export function ArrayVisualizer({
 
   return (
     <div className={`relative flex w-full items-end justify-center gap-2 px-2 ${visualizerHeight} ${isBarChart ? "pt-7" : ""}`}>
-      {elements.map((el) => {
+      {elements.map((el, index) => {
         const heightPct = isBarChart ? (Number(el.value) / maxVal) * 100 : 100;
         const elementHeight = isBarChart ? `${heightPct}%` : compact ? 36 : 44;
 
         return (
           <motion.div
-            key={el.id}
-            layout
-            initial={{ opacity: 0, y: 12, height: isBarChart ? "12%" : elementHeight }}
+            key={isBarChart ? visualKeys[index] : el.id}
+            layout="position"
+            initial={isBarChart ? false : { opacity: 0, y: 12, height: elementHeight }}
             animate={{ opacity: 1, y: 0, height: elementHeight }}
             transition={{ ...SOFT_SPRING, opacity: { duration: 0.2 } }}
             className="relative flex flex-col items-center gap-1"
@@ -85,8 +92,7 @@ export function ArrayVisualizer({
           >
             <PointerLabel el={el} pointers={pointers} color={pointerColor} />
             <motion.div
-              layout
-              animate={emphasisMotion(el.state)}
+              animate={isBarChart ? { scale: 1, y: 0 } : emphasisMotion(el.state)}
               transition={SOFT_SPRING}
               className={`flex w-full items-end justify-center rounded-t-md border-2 transition-colors duration-300 ${STATE_STYLES[el.state]}`}
               style={{ height: "100%", minHeight: "32px", transformOrigin: "bottom" }}

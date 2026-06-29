@@ -78,4 +78,15 @@ describe("algorithm contracts", () => {
     expect(floodFill.meta.gridVariant).toBe("fill");
     expect(floodFill.meta.legend.some(({ tone }) => tone === "filled")).toBe(true);
   });
+
+  it("shows Dijkstra's best-known routes before the final result", () => {
+    const dijkstra = algorithms.find(({ meta }) => meta.id === "dijkstra")!;
+    const steps = dijkstra.generateSteps(dijkstra.meta.defaultInput);
+    const progressiveRouteSteps = steps
+      .slice(0, -2)
+      .filter((step) => step.edges?.some(({ state }) => state === "path"));
+
+    expect(progressiveRouteSteps.length).toBeGreaterThan(2);
+    expect(progressiveRouteSteps.every((step) => step.variables?.route)).toBe(true);
+  });
 });
