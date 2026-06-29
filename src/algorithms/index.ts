@@ -12,13 +12,12 @@ import { treeTraversal } from "./treeTraversal";
 import { bstInsert } from "./bstInsert";
 import { fibonacci } from "./fibonacci";
 import { twoPointers } from "./twoPointers";
-import { linkedList } from "./fortyTwo/linkedList";
-import { stackQueue } from "./fortyTwo/stackQueue";
-import { floodFill } from "./fortyTwo/floodFill";
-import { bfsMaze } from "./fortyTwo/bfsMaze";
-import { memoryBlocks } from "./fortyTwo/memoryBlocks";
-import { mergeSort42 } from "./fortyTwo/mergeSort42";
-import { quickSort42 } from "./fortyTwo/quickSort42";
+import { ftSplit } from "./fortyTwo/ftSplit";
+import { ftItoa } from "./fortyTwo/ftItoa";
+import { ftUnion } from "./fortyTwo/ftUnion";
+import { ftInter } from "./fortyTwo/ftInter";
+import { ftAtoi } from "./fortyTwo/ftAtoi";
+import { lastWord } from "./fortyTwo/lastWord";
 import type { AlgorithmDefinition } from "../types";
 
 export const mainAlgorithms: AlgorithmDefinition[] = [
@@ -39,13 +38,12 @@ export const mainAlgorithms: AlgorithmDefinition[] = [
 ];
 
 export const fortyTwoAlgorithms: AlgorithmDefinition[] = [
-  linkedList,
-  stackQueue,
-  mergeSort42,
-  quickSort42,
-  floodFill,
-  bfsMaze,
-  memoryBlocks,
+  ftSplit,
+  ftItoa,
+  ftAtoi,
+  ftUnion,
+  ftInter,
+  lastWord,
 ];
 
 export const algorithms: AlgorithmDefinition[] = [
