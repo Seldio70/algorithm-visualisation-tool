@@ -7,7 +7,7 @@ test("landing to learning workspace and playback", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Bubble Sort" })).toBeVisible();
 
   await page.getByRole("button", { name: "Play animation" }).click();
-  await expect(page.getByText(/Step 2 \/ 63/)).toBeVisible({ timeout: 2500 });
+  await expect(page.getByText(/Step 2 \/ \d+/)).toBeVisible({ timeout: 2500 });
 
   await page.getByRole("slider", { name: "Animation step" }).fill("10");
   await page.getByRole("tab", { name: "about" }).click();
@@ -47,4 +47,35 @@ test("learning preferences persist locally", async ({ page }) => {
   await speed.fill("3");
   await page.reload();
   await expect(page.getByRole("slider", { name: "Playback speed" })).toHaveValue("3");
+});
+
+test("Bubble Sort presets and custom arrays regenerate playback", async ({ page }) => {
+  await page.goto("/learn/bubble-sort");
+
+  const timeline = page.getByRole("slider", { name: "Animation step" }).first();
+  const averageLastStep = Number(await timeline.getAttribute("max"));
+
+  await page.getByRole("combobox", { name: "Bubble Sort input case" }).selectOption("best");
+  await expect(page.getByText("Active: Best case")).toBeVisible();
+  expect(Number(await timeline.getAttribute("max"))).toBeLessThan(averageLastStep);
+
+  await page.getByRole("textbox", { name: "Custom Bubble Sort array" }).fill("9, 3 9, 1");
+  await page.getByRole("button", { name: "Apply" }).click();
+  await expect(page.getByText("Active: Custom")).toBeVisible();
+  await expect(page.getByText(/Starting with \[9, 3, 9, 1\]/)).toBeVisible();
+  await expect(timeline).toHaveValue("0");
+
+  await page.getByRole("button", { name: "Play animation" }).click();
+  await expect(page.getByText(/Step 2 \/ \d+/)).toBeVisible({ timeout: 2500 });
+
+  await timeline.fill((await timeline.getAttribute("max"))!);
+  await expect(
+    page.getByRole("status").filter({ hasText: "Exercise complete" })
+  ).toBeVisible();
+
+  await page.getByRole("list", { name: "Algorithm pseudocode" }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole("list", { name: "Algorithm pseudocode" })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("Active: Average case")).toBeVisible();
 });

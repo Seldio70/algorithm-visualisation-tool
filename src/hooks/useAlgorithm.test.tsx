@@ -52,4 +52,12 @@ describe("useAlgorithm", () => {
     expect(result.current.isPlaying).toBe(false);
     button.remove();
   });
+
+  it("regenerates steps from an explicit input", () => {
+    const customInput = [5, 1, 3];
+    const { result } = renderHook(() => useAlgorithm(bubbleSort, customInput));
+
+    expect(result.current.steps[0].elements.map(({ value }) => value)).toEqual(customInput);
+    expect(result.current.steps.at(-1)!.elements.map(({ value }) => value)).toEqual([1, 3, 5]);
+  });
 });
