@@ -17,10 +17,10 @@ function readStoredSpeed(): number {
   }
 }
 
-export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
+export function useAlgorithm(algo: AlgorithmDefinition | undefined, input?: number[]) {
   const steps = useMemo<Step[]>(
-    () => (algo ? algo.generateSteps(algo.meta.defaultInput) : []),
-    [algo]
+    () => (algo ? algo.generateSteps(input ?? algo.meta.defaultInput) : []),
+    [algo, input]
   );
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -120,12 +120,13 @@ export function useAlgorithm(algo: AlgorithmDefinition | undefined) {
     setIsPlaying(true);
   }, [currentStep, isPlaying, steps.length]);
 
-  const step = steps[currentStep];
-  const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;
+  const visibleStep = Math.min(currentStep, Math.max(0, steps.length - 1));
+  const step = steps[visibleStep];
+  const progress = steps.length > 1 ? (visibleStep / (steps.length - 1)) * 100 : 0;
 
   return {
     steps,
-    currentStep,
+    currentStep: visibleStep,
     step,
     isPlaying,
     speed,

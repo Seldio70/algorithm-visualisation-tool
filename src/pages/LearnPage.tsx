@@ -14,6 +14,7 @@ import { LanguagePanel } from "../components/LanguagePanel";
 import { Notepad } from "../components/Notepad";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
 import type { ThemeAccent, AlgorithmDefinition } from "../types";
+import type { BubbleSortInputSource } from "../algorithms/bubbleSortCases";
 import { usePageMetadata } from "../hooks/usePageMetadata";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -53,6 +54,9 @@ interface AlgorithmWorkspaceProps {
 }
 
 export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, sidebarAlgorithms }: AlgorithmWorkspaceProps) {
+  const [view, setView] = useState<"visualizer" | "about">("visualizer");
+  const [algorithmInput, setAlgorithmInput] = useState<number[]>(() => [...algo.meta.defaultInput]);
+  const [bubbleInputSource, setBubbleInputSource] = useState<BubbleSortInputSource>("average");
   const [view, setView] = useState<"visualizer" | "about" | "notes">("visualizer");
   const [sidebarOpen, setSidebarOpen] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 640px)").matches : true
@@ -74,9 +78,14 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
     next,
     seek,
     togglePlay,
-  } = useAlgorithm(algo);
+  } = useAlgorithm(algo, algorithmInput);
 
   const { meta } = algo;
+  const applyBubbleInput = (input: number[], source: BubbleSortInputSource) => {
+    reset();
+    setAlgorithmInput([...input]);
+    setBubbleInputSource(source);
+  };
   usePageMetadata(`${meta.name} · AlgoVisualisation`, accent);
 
   useEffect(() => {
@@ -232,10 +241,10 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
               </div>
             </div>
           ) : (
-            <div id="panel-visualizer" role="tabpanel" aria-labelledby="tab-visualizer" className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-2 lg:flex-row lg:gap-3 lg:p-3">
+            <div id="panel-visualizer" role="tabpanel" aria-labelledby="tab-visualizer" className={`themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto p-2 lg:flex-row lg:gap-3 lg:overflow-hidden lg:p-3`}>
               <div className="glass-panel flex min-w-0 shrink-0 flex-col overflow-hidden rounded-2xl lg:max-w-[52%] lg:flex-1 lg:shrink">
                 <div className="flex shrink-0 flex-col border-b border-white/10 bg-white/[0.025] p-3 sm:p-4 lg:min-h-0 lg:flex-1">
-                  <div className="h-36 sm:h-40 lg:h-auto lg:flex-1 lg:min-h-[12rem] flex items-center justify-center overflow-hidden">
+                  <div className="relative h-36 sm:h-40 lg:h-auto lg:flex-1 lg:min-h-[12rem] flex items-center justify-center overflow-hidden">
                     {step && (
                       <Visualizer
                         step={step}
@@ -246,6 +255,9 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                         accent={accent}
                       />
                     )}
+                    <CompletionCelebration
+                      active={steps.length > 0 && currentStep === steps.length - 1}
+                    />
                   </div>
                   <Legend items={meta.legend} />
                 </div>
@@ -278,9 +290,15 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                 </div>
               </div>
 
-              <div className="glass-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl max-h-[40vh] lg:max-h-none lg:w-[48%] lg:min-w-[22rem] lg:flex-none">
+              <div className="glass-panel flex min-h-[24rem] min-w-0 shrink-0 flex-col overflow-hidden rounded-2xl lg:min-h-0 lg:max-h-none lg:w-[48%] lg:min-w-[22rem] lg:flex-none">
                 <div className="shrink-0 border-b border-white/10 bg-white/[0.025] px-4 py-2.5">
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Code</p>
+                  {meta.id === "bubble-sort" && (
+                    <BubbleSortInputControls
+                      activeSource={bubbleInputSource}
+                      onApply={applyBubbleInput}
+                    />
+                  )}
                 </div>
                 <div className="flex-1 overflow-auto p-3 min-h-0">
                   {step && <CodePanel code={meta.code} highlightedLines={step.highlightedLines} accent={accent} />}
