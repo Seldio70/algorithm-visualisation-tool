@@ -11,6 +11,7 @@ import { VariablesPanel } from "../components/VariablesPanel";
 import { Controls } from "../components/Controls";
 import { StepExplanation } from "../components/StepExplanation";
 import { LanguagePanel } from "../components/LanguagePanel";
+import { Notepad } from "../components/Notepad";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
 import type { ThemeAccent, AlgorithmDefinition } from "../types";
 import { usePageMetadata } from "../hooks/usePageMetadata";
@@ -52,7 +53,7 @@ interface AlgorithmWorkspaceProps {
 }
 
 export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, sidebarAlgorithms }: AlgorithmWorkspaceProps) {
-  const [view, setView] = useState<"visualizer" | "about">("visualizer");
+  const [view, setView] = useState<"visualizer" | "about" | "notes">("visualizer");
   const [sidebarOpen, setSidebarOpen] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 640px)").matches : true
   );
@@ -177,7 +178,7 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
               )}
             </div>
             <div className="flex gap-1 shrink-0" role="tablist" aria-label="Exercise view">
-              {(["visualizer", "about"] as const).map((v) => (
+              {(["visualizer", "about", "notes"] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
@@ -222,6 +223,12 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
               </div>
               <div className="max-w-5xl mt-6 glass-panel rounded-2xl p-4 sm:p-5">
                 <LanguagePanel algorithmId={meta.id} accent={accent} pseudocode={meta.code} />
+              </div>
+            </div>
+          ) : view === "notes" ? (
+            <div id="panel-notes" role="tabpanel" aria-labelledby="tab-notes" className={`themed-scrollbar ${accent === "violet" ? "themed-scrollbar-violet" : "themed-scrollbar-cyan"} flex-1 overflow-auto p-4 sm:p-6`}>
+              <div className="max-w-3xl mx-auto">
+                <Notepad algorithmId={meta.id} algorithmName={meta.name} accent={accent} />
               </div>
             </div>
           ) : (
