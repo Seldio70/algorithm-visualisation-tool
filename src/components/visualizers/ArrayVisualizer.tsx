@@ -242,6 +242,135 @@ export function QueueVisualizer({ elements }: { elements: VisualElement[] }) {
   );
 }
 
+export function SplitVisualizer({
+  elements,
+  pointers,
+  pointerColor,
+}: {
+  elements: VisualElement[];
+  pointers?: Pointer[];
+  pointerColor: string;
+}) {
+  const chars = elements.filter((e) => e.id.startsWith("c-"));
+  const words = elements.filter((e) => e.id.startsWith("w-"));
+
+  return (
+    <div className="flex w-full flex-col items-center gap-4 px-2">
+      <div className="flex flex-col items-center gap-1.5">
+        <span className="text-[10px] uppercase tracking-wider text-slate-500">input string</span>
+        <div className="flex flex-wrap items-end justify-center gap-1 pt-6">
+          {chars.map((el) => (
+            <div key={el.id} className="relative flex flex-col items-center">
+              <PointerLabel el={el} pointers={pointers} color={pointerColor} />
+              <motion.div
+                layout
+                animate={emphasisMotion(el.state)}
+                transition={SOFT_SPRING}
+                className={`flex h-10 w-7 items-center justify-center rounded-md border-2 font-mono text-sm font-bold text-white transition-colors duration-300 ${STATE_STYLES[el.state]}`}
+              >
+                {el.value}
+              </motion.div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <span className="font-mono text-sm text-slate-500">↓ ft_split ↓</span>
+
+      <div className="flex w-full flex-col items-center gap-1.5">
+        <span className="text-[10px] uppercase tracking-wider text-slate-500">char **res</span>
+        <div className="flex min-h-[3rem] flex-wrap items-center justify-center gap-2">
+          <AnimatePresence mode="popLayout">
+            {words.length === 0 ? (
+              <span className="font-mono text-xs text-slate-600">(empty — not filled yet)</span>
+            ) : (
+              words.map((el) => (
+                <motion.div
+                  key={el.id}
+                  layout
+                  initial={{ opacity: 0, y: 12, scale: 0.85 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={SOFT_SPRING}
+                  className={`flex flex-col items-center rounded-lg border-2 px-3 py-1.5 font-mono text-sm font-bold text-white transition-colors duration-300 ${STATE_STYLES[el.state]}`}
+                >
+                  <span>{el.value}</span>
+                  {el.label && <span className="text-[9px] font-normal opacity-60">{el.label}</span>}
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CharRow({
+  label,
+  cells,
+  pointers,
+  pointerColor,
+}: {
+  label: string;
+  cells: VisualElement[];
+  pointers?: Pointer[];
+  pointerColor: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-20 shrink-0 text-right font-mono text-[11px] text-slate-500">{label}</span>
+      <div className="flex flex-wrap items-end gap-1 pt-6">
+        {cells.length === 0 ? (
+          <span className="font-mono text-xs text-slate-600">(empty)</span>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {cells.map((el) => (
+              <motion.div key={el.id} layout className="relative flex flex-col items-center">
+                <PointerLabel el={el} pointers={pointers} color={pointerColor} />
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, y: 10, scale: 0.85 }}
+                  animate={{ opacity: 1, ...emphasisMotion(el.state) }}
+                  transition={SOFT_SPRING}
+                  className={`flex h-9 w-7 items-center justify-center rounded-md border-2 font-mono text-sm font-bold text-white transition-colors duration-300 ${STATE_STYLES[el.state]}`}
+                >
+                  {el.value}
+                </motion.div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function StringSetVisualizer({
+  elements,
+  pointers,
+  pointerColor,
+}: {
+  elements: VisualElement[];
+  pointers?: Pointer[];
+  pointerColor: string;
+}) {
+  const s1 = elements.filter((e) => e.id.startsWith("a-"));
+  const s2 = elements.filter((e) => e.id.startsWith("b-"));
+  const set = elements.filter((e) => e.id.startsWith("set-"));
+  const out = elements.filter((e) => e.id.startsWith("o-"));
+
+  return (
+    <div className="flex w-full flex-col gap-3 px-2">
+      <CharRow label="s1" cells={s1} pointers={pointers} pointerColor={pointerColor} />
+      <CharRow label="s2" cells={s2} pointers={pointers} pointerColor={pointerColor} />
+      <CharRow label="set[256]" cells={set} pointers={pointers} pointerColor={pointerColor} />
+      <div className="mt-1 border-t border-white/10 pt-3">
+        <CharRow label="output" cells={out} pointers={pointers} pointerColor={pointerColor} />
+      </div>
+    </div>
+  );
+}
+
 export function MemoryVisualizer({ elements }: { elements: VisualElement[] }) {
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-2">

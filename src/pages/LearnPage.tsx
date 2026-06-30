@@ -10,8 +10,6 @@ import { CodePanel } from "../components/CodePanel";
 import { VariablesPanel } from "../components/VariablesPanel";
 import { Controls } from "../components/Controls";
 import { StepExplanation } from "../components/StepExplanation";
-import { BubbleSortInputControls } from "../components/BubbleSortInputControls";
-import { CompletionCelebration } from "../components/CompletionCelebration";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
 import type { ThemeAccent, AlgorithmDefinition } from "../types";
 import type { BubbleSortInputSource } from "../algorithms/bubbleSortCases";
@@ -228,9 +226,9 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                   <div className="text-xs text-slate-500 mb-1">Space Complexity</div>
                   <div className="font-mono font-bold text-purple-400">{meta.spaceComplexity}</div>
                 </div>
-                <div className="glass-panel rounded-2xl p-4">
-                  <CodePanel code={meta.code} highlightedLines={[]} accent={accent} />
-                </div>
+              </div>
+              <div className="max-w-5xl mt-6 glass-panel rounded-2xl p-4 sm:p-5">
+                <LanguagePanel algorithmId={meta.id} accent={accent} pseudocode={meta.code} />
               </div>
             </div>
           ) : (
@@ -255,7 +253,15 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
                   <Legend items={meta.legend} />
                 </div>
 
-                {step && <StepExplanation explanation={step.explanation} accent={accent} isPlaying={isPlaying} />}
+                {step && (
+                  <StepExplanation
+                    explanation={step.explanation}
+                    accent={accent}
+                    isPlaying={isPlaying}
+                    currentStep={currentStep}
+                    totalSteps={steps.length}
+                  />
+                )}
 
                 <div className="glass-subtle shrink-0 border-t">
                   <Controls

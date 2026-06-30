@@ -57,7 +57,9 @@ export type VisualizerLayout =
   | "linked-list"
   | "stack"
   | "queue"
-  | "memory";
+  | "memory"
+  | "split"
+  | "string-set";
 
 export type GridVariant = "maze" | "fill";
 

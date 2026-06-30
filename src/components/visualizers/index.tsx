@@ -1,6 +1,6 @@
 import type { GraphLayout, GridVariant, Step, VisualizerLayout, ThemeAccent } from "../../types";
 import { ACCENT } from "../../constants/theme";
-import { ArrayVisualizer, LinkedListVisualizer, StackVisualizer, QueueVisualizer, MemoryVisualizer } from "./ArrayVisualizer";
+import { ArrayVisualizer, LinkedListVisualizer, StackVisualizer, QueueVisualizer, MemoryVisualizer, SplitVisualizer, StringSetVisualizer } from "./ArrayVisualizer";
 import { GraphVisualizer } from "./GraphVisualizer";
 import { TreeVisualizer } from "./TreeVisualizer";
 import { GridVisualizer } from "./GridVisualizer";
@@ -82,6 +82,14 @@ export function Visualizer({
 
   if (effectiveLayout === "memory") {
     return <MemoryVisualizer elements={elements} />;
+  }
+
+  if (effectiveLayout === "split") {
+    return <SplitVisualizer elements={elements} pointers={pointers} pointerColor={pointerColor} />;
+  }
+
+  if (effectiveLayout === "string-set") {
+    return <StringSetVisualizer elements={elements} pointers={pointers} pointerColor={pointerColor} />;
   }
 
   return (

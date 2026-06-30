@@ -49,8 +49,9 @@ function FortyTwoHub() {
           Built for <span className="bg-gradient-to-r from-violet-300 to-fuchsia-400 bg-clip-text text-transparent">42 Tirana</span> students
         </h1>
         <p className="text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-          Algorithms you'll actually encounter in the 42 curriculum — linked lists, malloc internals,
-          flood fill, maze pathfinding, and sorting strategies. Each visualization notes which project it maps to.
+          Functions you'll actually implement in the 42 curriculum — libft staples like ft_split, ft_itoa
+          and ft_atoi, plus exam classics like ft_union, ft_inter and last_word. Each visualization notes
+          which project it maps to.
         </p>
 
         <div className="grid sm:grid-cols-2 gap-4 text-left">
