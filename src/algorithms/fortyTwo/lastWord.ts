@@ -41,7 +41,7 @@ function makeStr(states: Record<number, ElementState>, pointers: Record<number, 
   return { els, ptrs };
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const base: Record<number, ElementState> = {};

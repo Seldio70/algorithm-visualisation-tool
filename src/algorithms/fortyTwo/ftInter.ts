@@ -33,7 +33,7 @@ function makeOut(out: string[], justAdded: boolean): VisualElement[] {
   }));
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const map: Record<string, number> = {};
@@ -128,7 +128,7 @@ function generateSteps(_input: number[]): Step[] {
   }
 
   steps.push({
-    id: stepId++,
+    id: stepId,
     elements: snapshot(baseA, baseB, null, false),
     highlightedLines: [16],
     explanation: `✅ ft_inter prints "${out.join("")}" — characters present in both strings, each once, in s1's order.\n\n📚 What to learn: setting map = 0 after printing is what dedupes the output. The two passes give O(n + m) time with a fixed 256-byte table (O(1) space).`,

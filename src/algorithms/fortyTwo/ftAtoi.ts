@@ -34,7 +34,7 @@ function makeStr(states: Record<number, ElementState>): VisualElement[] {
   }));
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const base: Record<number, ElementState> = {};
@@ -109,7 +109,7 @@ function generateSteps(_input: number[]): Step[] {
   }
 
   steps.push({
-    id: stepId++,
+    id: stepId,
     elements: makeStr(base),
     highlightedLines: [16],
     explanation: `✅ ft_atoi returns r * sg = ${r} * ${sg} = ${r * sg}.\n\n📚 What to learn: this version (like the original) doesn't guard against int overflow on huge inputs — the strict libft/get_next_line use cases usually do. Note '+'/'-' is read only once, and parsing halts at the first non-digit.`,

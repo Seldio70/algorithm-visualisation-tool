@@ -53,7 +53,7 @@ function makeBuf(buf: string[], states: Record<number, ElementState>): VisualEle
   }));
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
 
@@ -154,7 +154,7 @@ function generateSteps(_input: number[]): Step[] {
 
   const result = buf.slice(0, len).join("");
   steps.push({
-    id: stepId++,
+    id: stepId,
     elements: makeBuf(buf, Object.fromEntries(buf.map((_, i) => [i, "sorted" as ElementState]))),
     highlightedLines: [30],
     explanation: `✅ ft_itoa returns "${result}" (a malloc'd, null-terminated string).\n\n📚 What to learn: copying n into a long is the trick that makes INT_MIN (-2147483648) work — negating it as an int would overflow. The caller owns the returned pointer and must free it.`,

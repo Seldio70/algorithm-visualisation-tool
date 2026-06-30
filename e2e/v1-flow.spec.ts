@@ -17,8 +17,8 @@ test("landing to learning workspace and playback", async ({ page }) => {
 test("42 hub and invalid routes are navigable", async ({ page }) => {
   await page.goto("/42");
   await expect(page.getByRole("heading", { name: /Built for 42 Tirana/i })).toBeVisible();
-  await page.getByRole("link", { name: /Memory Blocks/i }).click();
-  await expect(page.getByRole("heading", { name: "Memory Blocks (malloc)" })).toBeVisible();
+  await page.getByRole("link", { name: /ft_split/i }).click();
+  await expect(page.getByRole("heading", { name: "ft_split" })).toBeVisible();
 
   await page.goto("/does-not-exist");
   await expect(page.getByRole("heading", { name: /Lost in the algorithm/i })).toBeVisible();

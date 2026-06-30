@@ -12,6 +12,8 @@ import { Controls } from "../components/Controls";
 import { StepExplanation } from "../components/StepExplanation";
 import { LanguagePanel } from "../components/LanguagePanel";
 import { Notepad } from "../components/Notepad";
+import { BubbleSortInputControls } from "../components/BubbleSortInputControls";
+import { CompletionCelebration } from "../components/CompletionCelebration";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
 import type { ThemeAccent, AlgorithmDefinition } from "../types";
 import type { BubbleSortInputSource } from "../algorithms/bubbleSortCases";
@@ -54,7 +56,6 @@ interface AlgorithmWorkspaceProps {
 }
 
 export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, sidebarAlgorithms }: AlgorithmWorkspaceProps) {
-  const [view, setView] = useState<"visualizer" | "about">("visualizer");
   const [algorithmInput, setAlgorithmInput] = useState<number[]>(() => [...algo.meta.defaultInput]);
   const [bubbleInputSource, setBubbleInputSource] = useState<BubbleSortInputSource>("average");
   const [view, setView] = useState<"visualizer" | "about" | "notes">("visualizer");

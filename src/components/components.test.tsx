@@ -67,9 +67,15 @@ describe("V1 interaction components", () => {
 
   it("controls live announcements during playback", () => {
     const { rerender } = render(<StepExplanation explanation="Compare values" />);
-    expect(screen.getByText("Compare values")).toHaveAttribute("aria-live", "polite");
+    expect(screen.getByText("Compare values").closest("[aria-live]")).toHaveAttribute(
+      "aria-live",
+      "polite"
+    );
     rerender(<StepExplanation explanation="Swap values" isPlaying />);
-    expect(screen.getByText("Swap values")).toHaveAttribute("aria-live", "off");
+    expect(screen.getByText("Swap values").closest("[aria-live]")).toHaveAttribute(
+      "aria-live",
+      "off"
+    );
   });
 
   it("announces exercise completion only on the final step", () => {

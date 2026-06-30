@@ -44,7 +44,7 @@ function makeOut(out: string[], justAdded: boolean): VisualElement[] {
   }));
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   const seen: Record<string, boolean> = {};

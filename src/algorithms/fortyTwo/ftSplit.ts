@@ -62,7 +62,7 @@ function makeWords(words: string[], newIndex: number): VisualElement[] {
   }));
 }
 
-function generateSteps(_input: number[]): Step[] {
+function generateSteps(): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
   // Persistent per-char states carried across steps (separators dimmed, copied chars green).
@@ -146,7 +146,7 @@ function generateSteps(_input: number[]): Step[] {
 
   // Final
   steps.push({
-    id: stepId++,
+    id: stepId,
     elements: [...makeChars(base), ...makeWords(words, -1)],
     highlightedLines: [20],
     explanation: `✅ ft_split returns res = [${words.map((w) => `"${w}"`).join(", ")}, NULL]. Each word is its own malloc'd string; the array ends with a NULL pointer.\n\n📚 What to learn: The caller must free every res[i] AND res itself. Forgetting either is a leak — the #1 thing 42's norm/moulinette and Valgrind check in libft.`,
