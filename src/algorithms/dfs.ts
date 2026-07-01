@@ -24,20 +24,21 @@ function buildEdges(nodeStates: Record<number, ElementState>, activeEdge?: [numb
   });
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const start = Math.min(SHARED_GRAPH_LABELS.length - 1, Math.max(0, input[0] ?? 0));
   const visited = new Set<number>();
-  const stack: number[] = [0];
+  const stack: number[] = [start];
 
   steps.push({
     id: stepId++,
-    elements: makeGraphElements({ 0: "current" }),
-    edges: buildEdges({ 0: "current" }),
+    elements: makeGraphElements({ [start]: "current" }),
+    edges: buildEdges({ [start]: "current" }),
     highlightedLines: [1, 2],
-    explanation: `DFS explores as deep as possible before backtracking, using a stack (or recursion). Starting from node A.`,
-    variables: { stack: "A" },
-    callStack: ["dfs(A)"],
+    explanation: `DFS explores as deep as possible before backtracking, using a stack (or recursion). Starting from node ${SHARED_GRAPH_LABELS[start]}.`,
+    variables: { stack: SHARED_GRAPH_LABELS[start] },
+    callStack: [`dfs(${SHARED_GRAPH_LABELS[start]})`],
   });
 
   while (stack.length > 0) {

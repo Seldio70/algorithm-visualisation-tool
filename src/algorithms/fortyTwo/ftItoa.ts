@@ -1,8 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../../types";
 import { ITOA_LEGEND } from "../../constants/legends";
 
-const N = -42;
-
 const CODE = `int get_length(long n) {
   int len = 0;
   if (n <= 0)
@@ -53,9 +51,10 @@ function makeBuf(buf: string[], states: Record<number, ElementState>): VisualEle
   }));
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const N = input[0] ?? -42;
 
   const len = getLength(N); // 3 for -42
   const size = len + 1; // includes '\0'
@@ -175,7 +174,7 @@ export const ftItoa: AlgorithmDefinition = {
     spaceComplexity: "O(d)",
     description:
       "Converts an int into a malloc'd, null-terminated string — digits filled right-to-left. The classic libft ft_itoa.",
-    defaultInput: [0],
+    defaultInput: [-42],
     accent: "violet",
     fortyTwoNote: "libft ft_itoa — handles negatives and INT_MIN via a long. Used everywhere you print numbers.",
     code: CODE,

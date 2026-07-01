@@ -1,7 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../../types";
 import { LAST_WORD_LEGEND } from "../../constants/legends";
-
-const STR = "Hello World  ";
+import { decodeText, encodeText } from "../inputEncoding";
 
 const CODE = `int is_space(char c) {
   return (c == ' ' || c == '\\t');
@@ -31,8 +30,8 @@ function display(ch: string): string {
   return ch;
 }
 
-function makeStr(states: Record<number, ElementState>, pointers: Record<number, string>) {
-  const els: VisualElement[] = [...STR].map((ch, i) => ({
+function makeStr(str: string, states: Record<number, ElementState>, pointers: Record<number, string>) {
+  const els: VisualElement[] = [...str].map((ch, i) => ({
     id: `c-${i}`,
     value: display(ch),
     state: states[i] ?? "default",
@@ -41,9 +40,10 @@ function makeStr(states: Record<number, ElementState>, pointers: Record<number, 
   return { els, ptrs };
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const STR = decodeText(input, "Hello World  ");
   const base: Record<number, ElementState> = {};
   let i = 0;
 
@@ -54,7 +54,7 @@ function generateSteps(): Step[] {
     pointers: Record<number, string>,
     variables: Record<string, number | string>
   ) => {
-    const { els, ptrs } = makeStr({ ...base, ...transient }, pointers);
+    const { els, ptrs } = makeStr(STR, { ...base, ...transient }, pointers);
     steps.push({ id: stepId++, elements: els, highlightedLines: lines, explanation, variables, pointers: ptrs });
   };
 
@@ -135,7 +135,7 @@ export const lastWord: AlgorithmDefinition = {
     spaceComplexity: "O(1)",
     description:
       "Prints the last word of a string by scanning backwards: skip trailing spaces, mark the end, then walk back over the word.",
-    defaultInput: [0],
+    defaultInput: encodeText("Hello World  "),
     accent: "violet",
     fortyTwoNote: "42 exam (Rank 02) — classic backwards-scan string exercise.",
     code: CODE,

@@ -164,6 +164,15 @@ html[data-accent="violet"]::-webkit-scrollbar-thumb {
   background: currentColor;
 }
 
+.algorithm-input-select {
+  color-scheme: dark;
+}
+
+.algorithm-input-select option {
+  color: #e2e8f0;
+  background: #0f172a;
+}
+
 .themed-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) #020617;
