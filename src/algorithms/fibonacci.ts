@@ -2,10 +2,10 @@ import type { AlgorithmDefinition, Step, ElementState } from "../types";
 import { finalStep } from "./helpers";
 import { STACK_QUEUE_LEGEND } from "../constants/legends";
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
-  const n = 5;
+  const n = Math.min(8, Math.max(0, input[0] ?? 5));
   const memo: Record<number, number> = {};
 
   steps.push({

@@ -1,8 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../../types";
 import { INTER_LEGEND } from "../../constants/legends";
-
-const S1 = "hello";
-const S2 = "world";
+import { decodeTextPair, encodeTextPair } from "../inputEncoding";
 
 const CODE = `void ft_inter(char *s1, char *s2) {
   int i = 0;
@@ -33,9 +31,10 @@ function makeOut(out: string[], justAdded: boolean): VisualElement[] {
   }));
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const [S1, S2] = decodeTextPair(input, "hello", "world");
   const map: Record<string, number> = {};
   const order: string[] = []; // unique chars of s2, in insertion order
   const out: string[] = [];
@@ -149,7 +148,7 @@ export const ftInter: AlgorithmDefinition = {
     spaceComplexity: "O(1)",
     description:
       "Prints the intersection of two strings — characters in s1 that also appear in s2, each only once, using a map[256] lookup.",
-    defaultInput: [0],
+    defaultInput: encodeTextPair("hello", "world"),
     accent: "violet",
     fortyTwoNote: "42 exam (Rank 02) — companion to ft_union; same 256-entry lookup-table technique.",
     code: CODE,

@@ -1,8 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../../types";
 import { UNION_LEGEND } from "../../constants/legends";
-
-const S1 = "hello";
-const S2 = "world";
+import { decodeTextPair, encodeTextPair } from "../inputEncoding";
 
 const CODE = `void ft_union(char *s1, char *s2) {
   char seen[256] = {0};
@@ -44,9 +42,10 @@ function makeOut(out: string[], justAdded: boolean): VisualElement[] {
   }));
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const [S1, S2] = decodeTextPair(input, "hello", "world");
   const seen: Record<string, boolean> = {};
   const order: string[] = [];
   const out: string[] = [];
@@ -155,7 +154,7 @@ export const ftUnion: AlgorithmDefinition = {
     spaceComplexity: "O(1)",
     description:
       "Prints the union of two strings — every character from s1 then s2, each one only once, using a seen[256] set.",
-    defaultInput: [0],
+    defaultInput: encodeTextPair("hello", "world"),
     accent: "violet",
     fortyTwoNote: "42 exam (Rank 02) — the seen[256] set pattern reappears in many pool/exam exercises.",
     code: CODE,

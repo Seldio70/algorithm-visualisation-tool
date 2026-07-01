@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { algorithms } from "./index";
+import { getAlgorithmInputProfile } from "./algorithmInputProfiles";
 
 describe("algorithm contracts", () => {
   it.each(algorithms.map((algorithm) => [algorithm.meta.id, algorithm] as const))(
@@ -77,4 +78,16 @@ describe("algorithm contracts", () => {
     expect(progressiveRouteSteps.length).toBeGreaterThan(2);
     expect(progressiveRouteSteps.every((step) => step.variables?.route)).toBe(true);
   });
+
+  it.each(algorithms.map((algorithm) => [algorithm.meta.id, algorithm] as const))(
+    "%s accepts every input pattern",
+    (_, algorithm) => {
+      const profile = getAlgorithmInputProfile(algorithm.meta);
+      for (const pattern of Object.values(profile.patterns)) {
+        const steps = algorithm.generateSteps(pattern.values);
+        expect(steps.length).toBeGreaterThan(0);
+        expect(steps[0].explanation.trim()).not.toBe("");
+      }
+    }
+  );
 });

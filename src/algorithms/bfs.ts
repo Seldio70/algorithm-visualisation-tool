@@ -24,25 +24,28 @@ function buildEdges(nodeStates: Record<number, ElementState>, activeEdge?: [numb
   });
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const start = Math.min(SHARED_GRAPH_LABELS.length - 1, Math.max(0, input[0] ?? 0));
   const visited = new Set<number>();
-  const queue: number[] = [0];
+  const queue: number[] = [start];
+  const visitOrder: number[] = [];
 
   steps.push({
     id: stepId++,
-    elements: makeGraphElements({ 0: "current" }),
-    edges: buildEdges({ 0: "current" }),
+    elements: makeGraphElements({ [start]: "current" }),
+    edges: buildEdges({ [start]: "current" }),
     highlightedLines: [1, 2, 3],
-    explanation: `BFS explores a graph level by level using a queue. Starting from node A (index 0).`,
-    variables: { queue: "A", visited: "A" },
+    explanation: `BFS explores a graph level by level using a queue. Starting from node ${SHARED_GRAPH_LABELS[start]} (index ${start}).`,
+    variables: { queue: SHARED_GRAPH_LABELS[start], visited: SHARED_GRAPH_LABELS[start] },
   });
 
-  visited.add(0);
+  visited.add(start);
 
   while (queue.length > 0) {
     const node = queue.shift()!;
+    visitOrder.push(node);
     const nodeStates: Record<number, ElementState> = {
       ...Object.fromEntries([...visited].map((v) => [v, "visited" as ElementState])),
       [node]: "current",
@@ -85,7 +88,7 @@ function generateSteps(): Step[] {
     ...finalStep(
       stepId,
       makeGraphElements(finalStates),
-      `✅ BFS visited all reachable nodes in level order: ${SHARED_GRAPH_LABELS.join(" → ")}.`,
+      `✅ BFS visited all reachable nodes in level order: ${visitOrder.map((node) => SHARED_GRAPH_LABELS[node]).join(" → ")}.`,
       "BFS finds shortest paths in unweighted graphs. It's the foundation of maze solving, social network degrees, and GPS routing.",
       12
     ),

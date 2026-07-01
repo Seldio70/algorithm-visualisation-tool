@@ -4,8 +4,9 @@ import { SEARCH_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
-  const arr = [...input].sort((a, b) => a - b);
-  const target = arr[Math.max(0, arr.length - 3)];
+  const values = input.length > 2 ? input.slice(0, -1) : [...input];
+  const arr = values.sort((a, b) => a - b);
+  const target = input.length > 2 ? input[input.length - 1] : arr[Math.max(0, arr.length - 3)];
   let stepId = 0;
 
   steps.push({
@@ -90,7 +91,7 @@ export const binarySearch: AlgorithmDefinition = {
     spaceComplexity: "O(1)",
     description:
       "Finds a target in a sorted array by repeatedly halving the search space. Incredibly efficient for large datasets.",
-    defaultInput: [3, 7, 12, 19, 24, 31, 38, 45, 56, 72],
+    defaultInput: [3, 7, 12, 19, 24, 31, 38, 45, 56, 72, 45],
     code: `function binarySearch(arr, target) {\n  let left = 0, right = arr.length - 1;\n  while (left <= right) {\n    const mid = Math.floor((left + right) / 2);\n    if (arr[mid] === target) return mid;\n    else if (arr[mid] < target) left = mid + 1;\n    else right = mid - 1;\n  }\n  return -1;\n}`,
   },
   generateSteps,

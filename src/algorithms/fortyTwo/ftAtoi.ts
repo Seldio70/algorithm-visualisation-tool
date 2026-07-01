@@ -1,7 +1,6 @@
 import type { AlgorithmDefinition, Step, ElementState, VisualElement } from "../../types";
 import { ATOI_LEGEND } from "../../constants/legends";
-
-const STR = "  -42abc";
+import { decodeText, encodeText } from "../inputEncoding";
 
 const CODE = `int ft_atoi(const char *str) {
   int r = 0;
@@ -26,17 +25,18 @@ function display(ch: string): string {
   return ch;
 }
 
-function makeStr(states: Record<number, ElementState>): VisualElement[] {
-  return [...STR].map((ch, i) => ({
+function makeStr(str: string, states: Record<number, ElementState>): VisualElement[] {
+  return [...str].map((ch, i) => ({
     id: `c-${i}`,
     value: display(ch),
     state: states[i] ?? "default",
   }));
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const STR = decodeText(input, "  -42abc");
   const base: Record<number, ElementState> = {};
 
   let r = 0;
@@ -45,7 +45,7 @@ function generateSteps(): Step[] {
 
   steps.push({
     id: stepId++,
-    elements: makeStr({}),
+    elements: makeStr(STR, {}),
     highlightedLines: [2, 3],
     explanation: `ft_atoi("${STR}") parses the leading integer. Start with r = 0 (result) and sg = 1 (sign).`,
     variables: { r, sg, str: `"${STR}"` },
@@ -55,7 +55,7 @@ function generateSteps(): Step[] {
   while (STR[i] === " " || STR[i] === "\t") {
     steps.push({
       id: stepId++,
-      elements: makeStr({ ...base, [i]: "current" }),
+      elements: makeStr(STR, { ...base, [i]: "current" }),
       highlightedLines: [4, 5],
       explanation: `str[${i}] is whitespace ('${display(STR[i])}') → skip it.`,
       variables: { r, sg },
@@ -70,7 +70,7 @@ function generateSteps(): Step[] {
     if (STR[i] === "-") sg = -1;
     steps.push({
       id: stepId++,
-      elements: makeStr({ ...base, [i]: "inserting" }),
+      elements: makeStr(STR, { ...base, [i]: "inserting" }),
       highlightedLines: [6, 7, 8],
       explanation: `str[${i}] = '${STR[i]}' is a sign → sg = ${sg}, then move past it.`,
       variables: { r, sg },
@@ -86,7 +86,7 @@ function generateSteps(): Step[] {
     r = r * 10 + digit;
     steps.push({
       id: stepId++,
-      elements: makeStr({ ...base, [i]: "current" }),
+      elements: makeStr(STR, { ...base, [i]: "current" }),
       highlightedLines: [12, 13, 14],
       explanation: `str[${i}] = '${STR[i]}' is a digit → r = r * 10 + ${digit} = ${r}.`,
       variables: { r, sg, digit },
@@ -100,7 +100,7 @@ function generateSteps(): Step[] {
   if (i < STR.length) {
     steps.push({
       id: stepId++,
-      elements: makeStr({ ...base, [i]: "comparing" }),
+      elements: makeStr(STR, { ...base, [i]: "comparing" }),
       highlightedLines: [12],
       explanation: `str[${i}] = '${STR[i]}' is not a digit → stop parsing. The rest of the string is ignored.`,
       variables: { r, sg },
@@ -110,7 +110,7 @@ function generateSteps(): Step[] {
 
   steps.push({
     id: stepId,
-    elements: makeStr(base),
+    elements: makeStr(STR, base),
     highlightedLines: [16],
     explanation: `✅ ft_atoi returns r * sg = ${r} * ${sg} = ${r * sg}.\n\n📚 What to learn: this version (like the original) doesn't guard against int overflow on huge inputs — the strict libft/get_next_line use cases usually do. Note '+'/'-' is read only once, and parsing halts at the first non-digit.`,
     variables: { result: r * sg },
@@ -130,7 +130,7 @@ export const ftAtoi: AlgorithmDefinition = {
     spaceComplexity: "O(1)",
     description:
       "Parses the leading integer from a string: skip whitespace, read an optional sign, then accumulate digits (r = r * 10 + digit).",
-    defaultInput: [0],
+    defaultInput: encodeText("  -42abc"),
     accent: "violet",
     fortyTwoNote: "libft ft_atoi — the inverse of ft_itoa; core to parsing input across 42 projects.",
     code: CODE,

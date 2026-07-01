@@ -12,11 +12,11 @@ import { Controls } from "../components/Controls";
 import { StepExplanation } from "../components/StepExplanation";
 import { LanguagePanel } from "../components/LanguagePanel";
 import { Notepad } from "../components/Notepad";
-import { BubbleSortInputControls } from "../components/BubbleSortInputControls";
+import { AlgorithmInputControls } from "../components/AlgorithmInputControls";
 import { CompletionCelebration } from "../components/CompletionCelebration";
 import { ACCENT, DIFFICULTY_COLOR } from "../constants/theme";
 import type { ThemeAccent, AlgorithmDefinition } from "../types";
-import type { BubbleSortInputSource } from "../algorithms/bubbleSortCases";
+import type { AlgorithmInputSource } from "../algorithms/algorithmInputProfiles";
 import { usePageMetadata } from "../hooks/usePageMetadata";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -57,7 +57,7 @@ interface AlgorithmWorkspaceProps {
 
 export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, sidebarAlgorithms }: AlgorithmWorkspaceProps) {
   const [algorithmInput, setAlgorithmInput] = useState<number[]>(() => [...algo.meta.defaultInput]);
-  const [bubbleInputSource, setBubbleInputSource] = useState<BubbleSortInputSource>("average");
+  const [inputSource, setInputSource] = useState<AlgorithmInputSource>("average");
   const [view, setView] = useState<"visualizer" | "about" | "notes">("visualizer");
   const [sidebarOpen, setSidebarOpen] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 640px)").matches : true
@@ -82,10 +82,10 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
   } = useAlgorithm(algo, algorithmInput);
 
   const { meta } = algo;
-  const applyBubbleInput = (input: number[], source: BubbleSortInputSource) => {
+  const applyAlgorithmInput = (input: number[], source: AlgorithmInputSource) => {
     reset();
     setAlgorithmInput([...input]);
-    setBubbleInputSource(source);
+    setInputSource(source);
   };
   usePageMetadata(`${meta.name} · AlgoVisualisation`, accent);
 
@@ -294,12 +294,12 @@ export function AlgorithmWorkspace({ algo, selectedId, basePath, forceAccent, si
               <div className="glass-panel flex min-h-[24rem] min-w-0 shrink-0 flex-col overflow-hidden rounded-2xl lg:min-h-0 lg:max-h-none lg:w-[48%] lg:min-w-[22rem] lg:flex-none">
                 <div className="shrink-0 border-b border-white/10 bg-white/[0.025] px-4 py-2.5">
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Code</p>
-                  {meta.id === "bubble-sort" && (
-                    <BubbleSortInputControls
-                      activeSource={bubbleInputSource}
-                      onApply={applyBubbleInput}
-                    />
-                  )}
+                  <AlgorithmInputControls
+                    meta={meta}
+                    accent={accent}
+                    activeSource={inputSource}
+                    onApply={applyAlgorithmInput}
+                  />
                 </div>
                 <div className="flex-1 overflow-auto p-3 min-h-0">
                   {step && <CodePanel code={meta.code} highlightedLines={step.highlightedLines} accent={accent} />}

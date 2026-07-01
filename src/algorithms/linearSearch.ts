@@ -4,8 +4,8 @@ import { SEARCH_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
-  const arr = [...input];
-  const target = arr[Math.floor(arr.length / 2)];
+  const arr = input.length > 2 ? input.slice(0, -1) : [...input];
+  const target = input.length > 2 ? input[input.length - 1] : arr[Math.floor(arr.length / 2)];
   let stepId = 0;
 
   steps.push({
@@ -71,7 +71,7 @@ export const linearSearch: AlgorithmDefinition = {
     timeComplexity: { best: "O(1)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(1)",
     description: "Sequentially checks each element until the target is found or the array ends. Simple and works on unsorted data.",
-    defaultInput: [4, 2, 7, 1, 9, 3, 8],
+    defaultInput: [4, 2, 7, 1, 9, 3, 8, 1],
     code: `function linearSearch(arr, target) {\n  for (let i = 0; i < arr.length; i++) {\n    if (arr[i] === target) return i;\n  }\n  return -1;\n}`,
   },
   generateSteps,

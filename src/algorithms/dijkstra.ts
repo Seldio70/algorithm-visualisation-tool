@@ -4,8 +4,8 @@ import { DIJKSTRA_EDGES, DIJKSTRA_GRAPH_LAYOUT, edgeId } from "./graphConfig";
 import { DIJKSTRA_LEGEND } from "../constants/legends";
 
 const LABELS = ["A", "B", "C", "D", "E"];
-const SOURCE = 0;
-const TARGET = 4; // showcase shortest path A → E
+const DEFAULT_SOURCE = 0;
+const DEFAULT_TARGET = 4;
 
 function edgeKey(a: number, b: number): string {
   const { from, to } = edgeId(a, b);
@@ -83,9 +83,11 @@ function routeStates(
   return states;
 }
 
-function generateSteps(): Step[] {
+function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
   let stepId = 0;
+  const SOURCE = Math.min(LABELS.length - 1, Math.max(0, input[0] ?? DEFAULT_SOURCE));
+  const TARGET = Math.min(LABELS.length - 1, Math.max(0, input[1] ?? DEFAULT_TARGET));
   const dist = LABELS.map(() => Infinity);
   const parent: (number | null)[] = LABELS.map(() => null);
   const visited = new Set<number>();
@@ -97,8 +99,8 @@ function generateSteps(): Step[] {
     elements: makeNodes({ [SOURCE]: "current" }, dist),
     edges: buildEdges({ [SOURCE]: "current" }),
     highlightedLines: [1, 2],
-    explanation: `Dijkstra's finds shortest paths from source A to all nodes. Initialize distances to ∞, set A = 0.`,
-    variables: { source: "A", target: LABELS[TARGET] },
+    explanation: `Dijkstra's finds shortest paths from source ${LABELS[SOURCE]} to all nodes. Initialize distances to ∞, set ${LABELS[SOURCE]} = 0.`,
+    variables: { source: LABELS[SOURCE], target: LABELS[TARGET] },
   });
 
   while (visited.size < LABELS.length) {
@@ -173,7 +175,7 @@ function generateSteps(): Step[] {
     elements: makeNodes(finalNodeStates, dist, pathStep),
     edges: buildEdges(finalNodeStates, undefined, pathEdgeKeys),
     highlightedLines: [7],
-    explanation: `Shortest path A → ${LABELS[TARGET]}: ${pathLabels} (total cost ${pathCost}). Only this route is highlighted — other nodes show final distances.`,
+    explanation: `Shortest path ${LABELS[SOURCE]} → ${LABELS[TARGET]}: ${pathLabels} (total cost ${pathCost}). Only this route is highlighted — other nodes show final distances.`,
     variables: { path: pathLabels, cost: pathCost },
   });
 
@@ -181,7 +183,7 @@ function generateSteps(): Step[] {
     ...finalStep(
       stepId,
       makeNodes(finalNodeStates, dist, pathStep),
-      `✅ Shortest distances from A: ${LABELS.map((l, i) => `${l}=${dist[i]}`).join(", ")}. Path to ${LABELS[TARGET]}: ${pathLabels} (${pathCost}).`,
+      `✅ Shortest distances from ${LABELS[SOURCE]}: ${LABELS.map((l, i) => `${l}=${dist[i]}`).join(", ")}. Path to ${LABELS[TARGET]}: ${pathLabels} (${pathCost}).`,
       "Dijkstra's powers GPS navigation and network routing. It requires non-negative weights — use Bellman-Ford for negative edges.",
       8
     ),
@@ -203,7 +205,7 @@ export const dijkstra: AlgorithmDefinition = {
     timeComplexity: { best: "O(E log V)", average: "O(E log V)", worst: "O(V²)" },
     spaceComplexity: "O(V)",
     description: "Finds shortest paths from a source node to all other nodes in a weighted graph with non-negative edges.",
-    defaultInput: [0],
+    defaultInput: [0, 4],
     code: `function dijkstra(graph, source) {\n  initialize(dist, parent, source);\n  while (unvisited.size) {\n    const u = minDist(unvisited, dist);\n    for (const [v, weight] of graph[u])\n      if (dist[u] + weight < dist[v]) update(dist, parent, u, v);\n  } // reconstruct the requested shortest path\n  return { dist, parent };\n}`,
   },
   generateSteps,

@@ -4,11 +4,12 @@ import { SEARCH_LEGEND } from "../constants/legends";
 
 function generateSteps(input: number[]): Step[] {
   const steps: Step[] = [];
-  const arr = [...input].sort((a, b) => a - b);
+  const values = input.length > 2 ? input.slice(0, -1) : [...input];
+  const arr = values.sort((a, b) => a - b);
   let stepId = 0;
   let left = 0;
   let right = arr.length - 1;
-  const target = 14;
+  const target = input.length > 2 ? input[input.length - 1] : 14;
 
   steps.push({
     id: stepId++,
@@ -83,7 +84,7 @@ export const twoPointers: AlgorithmDefinition = {
     timeComplexity: { best: "O(n)", average: "O(n)", worst: "O(n)" },
     spaceComplexity: "O(1)",
     description: "Uses two pointers moving toward each other (or same direction) to solve problems in O(n) on sorted arrays.",
-    defaultInput: [1, 2, 4, 6, 8, 9, 11, 15],
+    defaultInput: [1, 2, 4, 6, 8, 9, 11, 15, 14],
     code: `function twoSum(arr, target) {\n  let left = 0, right = arr.length - 1;\n  while (left < right) {\n    const sum = arr[left] + arr[right];\n    if (sum === target) return [left, right];\n    else if (sum < target) left++;\n    else right--;\n  }\n  return null;\n}`,
   },
   generateSteps,
